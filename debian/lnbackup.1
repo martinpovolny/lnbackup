@@ -1,0 +1,245 @@
+.TH "LNBACKUP" "1" 
+.SH "NAME" 
+lnbackup \(em hardlink backup system for hard drives 
+.SH "SYNOPSIS" 
+.PP 
+\fBlnbackup\fR [\fB\-\-backup-name \fImy_backup\fR\fP]  [\fB\-\-backup\fP]  [\fB\-\-mount\fP]  [\fB\-\-umount\fP]  [\fB\-\-mirror-only\fP]  [\fB\-\-status\fP]  [\fB\-\-nagios\fP]  [\fB\-\-nagios-all\fP]  [\fB\-\-config-dir \fIconfig_dir\fR\fP]  [\fB\-\-log-level \fIlog_level\fR\fP]  [\fB\-\-log-file \fIlog_file\fR\fP]  
+.PP 
+\fBlnmount\fR 
+.PP 
+\fBlnumount\fR 
+.SH "DESCRIPTION" 
+.PP 
+This manual page documents briefly the 
+\fBlnbackup\fR command. 
+.PP 
+\fBlnbackup\fR is a hardlink backup system for hard drives. It creates incremental backups using hardlinks so that each backup seems like a full backup. 
+.PP 
+\fBlnbackup\fR can be used to make backup of whole system or selected directories. 
+.PP 
+\fBlnbackup\fR is usually used to create backups on a separate disk or partition, but it can also operate on o directory, both localy or remotely e.g. over NFS. 
+.PP 
+Optionally \fBlnbackup\fR can create bootable mirror. 
+.PP 
+\fBlnmount\fR and \fBlnumount\fR are shortcut wrappers for \fBlnbackup \-\-mount\fR and \fBlnbackup \-\-umount\fR respectively. All arguments given to \fBlnmount\fR are passed to \fBlnbackup\fR. 
+.SH "OPTIONS" 
+.PP 
+These programs follow the usual GNU command line syntax, 
+with long options starting with two dashes (`\-').  Description of 
+options is included below. 
+.IP "\fB\-\-backup-name\fP         " 10 
+Give a name of pre-configured backup (defaults to 'localhost'). 
+.IP "\fB-l\fP           \fB\-\-log-file \fIFILE\fR\fP         " 10 
+Set log file (defaults to /var/log/lnbackup). 
+.IP "\fB-v\fP           \fB\-\-log-level \fILEVEL\fR\fP         " 10 
+Set level of debug information. One of debug, [info], warn, error, fatal. Defaults to info. 
+.IP "\fB-c\fP           \fB\-\-config-dir \fIPATH\fR\fP         " 10 
+Set config directory where configuration of individual backups as well as global configuration is stored. Defaults to /etc/lnbackup.d/. 
+.IP "\fB-t\fP           \fB\-\-test\fP         " 10 
+Run in test mode (no action is done). Useful together with \fB-v debug\fP when debugging backup configuration. Allows you to see what actions would be done. 
+.IP "\fB-m\fP           \fB\-\-no-mirror\fP         " 10 
+Don't create mirror even when mirroring is configured. 
+.IP "\fB\-\-mirror-only\fP         " 10 
+Create only bootable mirror from latest backup. 
+.IP "\fB-s\fP           \fB\-\-status\fP         " 10 
+Report status for given backup. 
+.IP "\fB\-\-backup\fP         " 10 
+Run given backup. 
+.IP "\fB\-\-mount\fP" 10 
+Mount given backup. 
+.IP "\fB\-\-umount\fP" 10 
+Unmount given backup. 
+.IP "\fB\-\-nagios\fP" 10 
+Give short status for given backup information suitable for monitoring system Nagios. Also returns exit codes like Nagios plugins. 
+.IP "" 10 
+0 \-\- ok, 1 \-\- warning, 2 \-\- error. 
+.IP "\fB\-\-nagios-all\fP" 10 
+Same as \fB\-\-nagios\fP except it gives status of all configured backups (in given backup config directory) that do not have the key :dont_check set to true value. 
+.IP "\fB\-\-init-crypto=\fISIZE\fR\fP         " 10 
+Initialize crypto device (optional size applies to loopback file size). See section \fIENCRYPTED BACKUPS\fR for more information. 
+.IP "" 10 
+This command creates encrypted loopback device and formats it as ext3 filesystem to ease the process of creating encrypted backup. USE WITH MAXIMAL CARE. 
+.SH "EXAMPLES" 
+.IP "lnbackup \-\-backup" 10 
+Run backup 'localhost'. 
+.IP "lnbackup \-\-backup \-\-backup-name backup2 \-v debug \-t" 10 
+Run backup 'backup2', set loglevel to 'debug' (highest), and run in test mode (don't do anything, just pretend and log). 
+.SH "BASIC CONFIGURATION" 
+.PP 
+By default config files are stored in /etc/lnbackup.d/. Configuration consists of individual config files, some of which are global, like file 00global, other define individual backups, like 01localhost. 
+.PP 
+File \fB00global\fR is in Debian maintained by \fBdebconf\fR and defines basic values such as backup mountpoint, backup disk and backup partition. These values are global for all defined backups, but can be overriden in config files of individual backups. 
+.PP 
+All configuration files are Ruby hashes. When \fBlnbackup\fR starts it merges all config files into one config hash. Reason for this is to allow some files to be maintained by hand and others by system or let backup config files be added by other packages. 
+.PP 
+If you redefine some key defined in one file in another file, keep in mind that config files are merged in order given by numerical value of the first two letters of their names. 
+.PP 
+File \fB00global\fR file might look like this: 
+.PP 
+.nf 
+|    { 
+|        :device            => '/dev/hdc1', 
+|        :disk              => '/dev/hdc', 
+|        :mount_point       => '/mnt/backup', 
+|        :files_reserved    => '0', 
+|        :blocks_reserved   => '0', 
+|    }  
+.fi 
+.PP 
+This says, that backup device will be \fB/dev/hdc1\fR, this device will be mounted on \fB/mnt/backup\fR. And it is part of device \fB/dev/hdc\fR. Device \fB/dev/hdc\fR will be the device for \fBlilo\fR to write boot sector if some backup is configured to create bootable mirrors. 
+ 
+.PP 
+Backups will be stored under this mountpoint in directory structure of the form /mnt/backup/YYYY/MM/DD/backup_name/ or alternatively /mnt/backup/YYYY/MM/DD/HH/backup_name/. 
+.PP 
+.PP 
+Default configuration file \fB01localhost\fR, which defines backup of whole system looks like this: 
+.PP 
+.nf 
+|   { 
+|     :localhost => { 
+|       :dirs => [ 
+|         { :dir => '/',     :fs_type => :single,       # don't backup data below mountpoints 
+|           :exclude => [ 'tmp/.', 'backup/.' ] 
+|         }, 
+|         { :dir => '/boot', :fs_type => :single }, 
+|         { :dir => '/usr',  :fs_type => :local  },     # don't backup if mounted over network 
+|         { :dir => '/var',  :fs_type => :local,  
+|           :exclude => ['cache/apt/archives/.*deb', 'spool/squid/.'] 
+|         }, 
+|         { :dir => '/home', :fs_type => :local }, 
+|         { :dir => '/opt',  :fs_type => :local }, 
+|       ], 
+|       :mirror => true, 
+|       :monitor => {                                   # set age of backup for warning and error  
+|         :warn     => 26,                              #        status in nagios (time in hours) 
+|         :error    => 50, 
+:no_mirror_warn => true,                      # no warning on missing mirrror 
+|       } 
+|     }, 
+|   } 
+.fi 
+.PP 
+.PP 
+The key :localhost says, that we define backup named "localhost". It is a good idea to name the file with backup definition with the name of the backup. Number 01 preceding the backup name defines order in which the configuration file is merged into program's configuration as described above. 
+.PP 
+The key :dirs defines list of directories to be included in the backup and says what rules apply to this directory. 
+.PP 
+The key :mirror says that we want \fBlnbackup\fR to make bootable mirror from this backup. Be very carefull when using this option, because you can easily erase your data if you do this wrong! See section \fIBOOTABLE MIRRORS\fR for details. 
+.PP 
+Definition of directory to be backuped consists of 3 keys: 
+.IP "   \(bu" 6 
+:dir \-\- full path to the directory to be backuped. 
+.IP "   \(bu" 6 
+:fs_type \-\- used to control behaviour on filesystem border. 
+.RS 
+.IP "   \(bu" 6 
+:all \-\- backup all filesystems. 
+.IP "   \(bu" 6 
+:local \-\- backup local filesystem. 
+.IP "   \(bu" 6 
+:single \-\- backup only one filesystem (same as '\-x' in \fBfind\fR). 
+.RE 
+.IP "   \(bu" 6 
+:exclude \-\- list of directories relative to :dir to be excluded from backup. 
+.PP 
+When backing up files in directory the most specific :dir entry takes precedence. E.g. if backing up files in directory under /var/lib/ rules for /var take precedence over rules for /. 
+.SH "BOOTABLE MIRRORS" 
+.PP 
+\fBlnbackup\fR can save your day, if you use bootable mirrors. In that case you can simply boot the backup disk in case when master disk fails. We use \fBlnbackup\fR this way on almost all servers we maintain. 
+.PP 
+Bootable mirrors work in this way: 
+.IP "   1." 6 
+Normal backup is done the same way as without bootable mirror. 
+.IP "   2." 6 
+After normal backup is done, the root directory of backups is erased except for directory 'backup'. 
+.IP "   3." 6 
+Then the last backup is hardlinked into the root of the backup device. Then \fB/etc/fstab\fR on the backup device is generated. 
+.IP "   4." 6 
+Finally, unless given backup has key :skip_lilo set to true value, \fBlilo\fR is called to make backup disk bootable. 
+.PP 
+The key :skip_lilo comes in handy when you use boot loader such as \fBgrub\fR which doesn't need to be updated each time when location of kernel image, initramdisk, etc. is chanded. With \fBgrub\fR it is enough to make the backup disk bootable only once \-\- when you setup \fBlnbackup\fR for the first time. 
+.PP 
+As a security ensurance \fBlnbackup\fR will refuse to create a mirror if you do not specify a device and partition. 
+.SH "LNBACKUP WITHOUT DEDICATED BACKUP DISK" 
+.PP 
+Although not recomended, it is possible to use lnbackup without a dedicated backup disk. 
+.PP 
+In this case specify the directory where backups should be stored as ':mount_point' in the configuration file and enter an empty string as backup device and partition (':device' and ':disk). 
+.PP 
+Never use mirror option when using single disk for backups and other data. 
+.PP 
+Also don't forget to specify the percentage of blocks and inodes that should lnbackup leave free (':blocks_reserved', ':files_reserved'. 
+.SH "ENCRYPTED BACKUPS" 
+.PP 
+\fBlnbackup\fR supports encrypted backups via \fBloop\fR, \fBcryptoloop\fR and cipher (e.g. \fBaes\fR) kernel modules. 
+ 
+.PP 
+Encrypted backup devices cannot be used as bootable mirrors. 
+.PP 
+Configuration fragment for encrypted backups might look like this (file \fB00crypto\fR). 
+.PP 
+.nf 
+|   { 
+|       :crypto => 'aes256', 
+|       :password => 'somelongpassphrase', 
+|   } 
+.fi 
+.PP 
+This configuration fragment says, that kernel cipher \fBaes256\fR will be used (must be present in running kernel in the time of backup) and gives the passhprase for the cipher. 
+ 
+.SH "USING LABELS" 
+.PP 
+Lnbackup can be configured to locate backup disk using ext3 filesystem labels or UUIDs. 
+ 
+.PP 
+You can use \fBtune2fs\fR to label filesystems. E.g. to 
+label filesystem /dev/sdb1 with label BACKUP run the following command: 
+\fBtune2fs \-L BACKUP /dev/sdb1\fR. 
+ 
+.PP 
+Example configuration for using filesystem labels. 
+\fB/etc/lnbackup.d/00global\fR        
+.PP 
+.nf 
+|      { 
+|        :device      => '/dev/sd[c-z]*1', 
+|        :disk        => '/dev/sd[c-z]*', 
+|        :mount_point => '/mnt/backup', 
+|        :files_reserved  => '2%', 
+|        :blocks_reserved => '2%', 
+|      } 
+ 
+.fi 
+.PP 
+\fB/etc/lnbackup.d/01localhost\fR        
+.PP 
+.nf 
+|      { 
+|        :localhost => { 
+|          :dirs => [ { :dir => '/', :fs_type => :single,  
+|                       :exclude => [ 'tmp/.', 'backup/.' ] } ] 
+|          :device_label => 'BACKUP_SW_.*', 
+|        }, 
+|      } 
+ 
+.fi 
+.PP 
+ 
+.PP 
+CAUTION: It is not currently possible to use encrypted backup together with labels. 
+ 
+.SH "SEE ALSO" 
+.PP 
+Configuration files in /etc/lnbackup.d/. 
+.PP 
+Czech manual is also available. See 
+\fIlnbackup-manual.cz.txt\fP located in 
+/usr/share/doc/lnbackup-ng/. 
+.SH "AUTHOR" 
+.PP 
+This manual page was written by Martin Povolny (martin.povolny@solnet.cz). Permission is 
+granted to copy, distribute and/or modify this document under the terms of 
+the GNU Free Documentation License, Version 1.1 or any 
+later version published by the Free Software Foundation; with no Invariant 
+Sections, no Front-Cover Texts and no Back-Cover Texts. 
+.\" created by instant / docbook-to-man, Tue 22 Feb 2011, 11:55 

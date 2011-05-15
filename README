@@ -1,0 +1,11 @@
+Lnbackup is a hardlink backup system for hard drives. 
+
+Lnbackup operates in a way similar to the '--link-dest' switch in rsync.
+
+It creates incremental backups using hardlinks so that each backup seems like a full backup. Additionaly it can make (using hardlinks) bootable mirror from the latest backup.
+
+Obviously the target filesystem of lnbackup needs to support hardlinks.
+
+It's run on ~200 servers for several years and it is considered stable.
+
+Read the man page for more information.

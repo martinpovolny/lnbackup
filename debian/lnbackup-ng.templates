@@ -1,0 +1,33 @@
+Template: lnbackup-ng/welcome
+Type: note
+Description: Nasleduje konfigurace zalohovani
+
+Template: lnbackup-ng/disk
+Type: string
+Default: /dev/sdc
+Description: Device of backup disk for lilo
+  this command will be run: lilo ... -b <Device> ...
+
+Template: lnbackup-ng/part
+Type: string
+Default: /dev/sdc1
+Description: Partition for incremental backup
+
+Template: lnbackup-ng/mnt
+Type: string
+Default: /mnt/backup
+Description: Directory (mount point for backup)
+  this command will be run: mount <Partition> <Directory>
+
+Template: lnbackup-ng/free_i
+Type: string
+Default: 2% 
+Description: Amount of inodes to keep free
+  Number of inodes (or appropriate part when % is used) 
+
+Template: lnbackup-ng/free_b
+Type: string
+Default: 2% 
+Description: Amount of blocks to keep free
+  Number of blocks (or appropriate part when % is used) 
+

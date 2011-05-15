@@ -1,0 +1,136 @@
+==============================================
+ Manuál k zálohování pomocí programu lnbackup
+==============================================
+
+Lnbackup je nástroj, který umo¾òuje vytváøení pravidelných inkrementálních záloh.
+
+V øe¹eních soLNet je lnbackup zkonfigurován tak, ¾e vytváøí denní zálohy celého
+systému. Inkrementální zálohy jsou vytváøeny pomocí pevných odkazù, ka¾dá
+záloha se jeví jako obraz systému v dobì, kdy byla záloha poøízena.
+
+Zálohy se ukládají na samostatný disk. V pøípadì, ¾e na disku nedostává místa
+pro provedení zálohy, jsou mazány pøedchozí zálohy v poøadí od nejstar¹í.
+
+Nástroj obsahuje volbu, která umo¾ní vytvoøit z poslední zálohy bootovatelnou
+kopii.  Tato volba je v øe¹eních soLNet implicitnì povolena.
+
+Poznámky pøed instalací
+=======================
+
+Pro lnbackup je potøeba mít zálo¾ní disk minimálnì tak velký, jako je disk
+primární, nejlépe vìt¹í.
+
+Pokud jsou ve stroji pouze 2 IDE disky, je vhodné, aby primární disk a zálo¾ní
+disk byly ka¾dý na samostatném kanálu/øadièi (tedy v linuxu budou napø.
+/dev/hda a /dev/hdc).
+
+Zálohování bez zálo¾ního disku
+==============================
+
+V nouzovém pøípadì je mo¾né doèasnì a krátkodobì pou¾ít lnbackup k zálohování
+pøímo na primární disk (bez zálo¾ního disku).
+
+V tom pøípadì je potøeba pøi konfiguraci lnbackupu zadat procento volných
+i-uzkù a blokù (napøíklad 20%) a jako zaøízení zálo¾ního disku a partition pro
+zálohy zadat prázdný øetìzec.
+
+V tomto pøípadì NENÍ MO®NOST ZAVEDENÍ SYSTÉMU ZE ZÁLOHY!
+
+Základní obsluha programu lnbackup
+==================================
+
+Zálohování je provádìno automaticky prostøednictvím daemona cron. Z pøíkazové
+øádky je mo¾né zálohování provést pøíkazem 'lnbackup --backup' pøípadnì
+'lnbackup --backup-name <jmeno_zalohy> --backup'. Implicitní záloha se jmenuje
+'localhost'.
+
+Více informací o pøíkazové øádce programu lnbackup získáte pøíkazem
+'lnbackup --help'.
+
+Informaci o stavu primární zálohy lze s pøíkazové øádky rychle získat pøíkazem
+'lnstat', pøipojení zálohy v read-only re¾imu provede pøíkaz 'lnmount',
+read-write 'lnmount --rw'. Odmontování zajistí pøíkaz 'lnumount'.
+
+©ifrované zálohy
+================
+
+Lnbackup podporuje vytváøení ¹ifrovaných záloh pomocí cryptoloop. Tota
+vlastnost pøijde vhod v kombinaci s USB2/FireWire rámeèkem, napøíklad pokud
+chcete zálohu odná¹et mimo firmu.
+
+Pøíprava:
+---------
+
+Je potøeba mít vhodné jádro (s øadou 2.6 není problém) a zavést potøebné
+moduly: 'loop', 'cryptoloop' a modul pro vybranou ¹ifru (napøíklad 'aes' pro
+¹ifru aes256).
+
+Je nutné mít verzi programu 'losetup' s podporou cryptoloop. Tzn. v debianu
+instalovat balík loop-aes-utils (pro woodyho k dispozici na backports.org).
+
+Dále je nutné nakonfigurovat parametry ¹ifrování pro lnbackup. Napøíklad takto:
+
+Soubor /etc/lnbackup.d/00crypto:
+
+{
+  :crypto => 'aes256',
+  :password => 'mamamelemasotobudebasta',
+}
+
+':password' je klíèem pou¾ité ¹ifry a musí mít dostateènou délku podle pou¾ité
+¹ifry.
+
+Pokud máme lnbackup nakonfigurovaný, tedy zejména NASTAVENOU SPRÁVNOU PARTITION
+PRO ZÁLOHOVÁNÍ, lze pou¾ít pøíkaz napø. 'lnbackup -v debug -l - --init-crypto',
+který zinicializuje ¹ifrovanou partition parametru zadanými v souboru 00crypto,
+a vytvoøí na ní souborový systém.
+
+Ovìøení, øe se v¹e povedlo provedeme napø. pøíkazem 'lnmount' a výpisem 
+pøipojených diskù.
+
+Zálohování windows stanic na server
+===================================
+
+Úvodem bych poznamenal, ze koncepènì se nejedná o dobrý nápad.
+
+Jsou 2 mo¾nosti:
+a) individuální záloha
+    
+   pomocí klíèù :pre_command a :post_command pøimontujeme pøed samotnou zálohou
+   pøístu¹né adresáøe.
+
+   Pøíklad:
+
+   :apolo_13 => {
+        :pre_command =>
+            'mount -t cifs '+
+            '-o iocharset=iso8859-2,codepage=cp852,username=@administrator,password=op1cKa4,ip=10.0.133.6 '+
+            '//apolo_13/C-zaloha /mnt/apolo_13_c_zaloha',
+        :post_command => 'umount /mnt/apolo_13_c_zaloha',
+
+        :dirs => [ { :dir => '/mnt/apolo_13_c_zaloha/vyvoj/', :fs_type => :single, } ],
+    },
+
+
+b) hromadná záloha -- zálohujeme stejným zpùsobem více PC stanic (stejný share, vysdílený 
+   pod stejným u¾ivatelem a stejným heslem).
+
+   Pøíklad je v souboru /etc/lnbackup.d/09pcb. 
+
+   Dùle¾ité klíèe:
+
+    :backup_share       => 'backup',            # jméno share
+    :backup_user        => 'admin',             # u¾ivatel
+    :backup_password    => 'admin',             # heslo
+    :backup_workgroup   => 'invex.cz',          # workgroup/domain
+
+    :backup_hosts       => ['172.27.0.2',
+                            'JAN_MALIK' ],      # seznam poèítaèù (IP, nebo NetBIOS name)
+
+Dùle¾ité upozornìní
+===================
+
+Je dùle¾ité sledovat logy pøíslu¹ných záloh. Pokud lnbackup bìhem zálohy narazí
+na soubor, který nemù¾e pøeèíst, pøeskoèí jej a zapí¹e chybové hláèení do logu.
+Záloha v¹ak skonèí úspì¹nì!
+

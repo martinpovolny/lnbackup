@@ -1,0 +1,9 @@
+{
+  :windows => {
+    :dirs => [ 
+      { :dir => '/', :fs_type => :single, }, 
+    ],
+    :mirror     => false,
+    :dont_check => true,
+  },
+}

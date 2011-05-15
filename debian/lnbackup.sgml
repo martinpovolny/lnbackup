@@ -1,0 +1,404 @@
+<!doctype refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+
+<!-- Process this file with docbook-to-man to generate an nroff manual
+     page: `docbook-to-man manpage.sgml > manpage.1'.  You may view
+     the manual page with: `docbook-to-man manpage.sgml | nroff -man |
+     less'.  A typical entry in a Makefile or Makefile.am is:
+
+lnbackup.1: lnbackup.sgml
+	docbook-to-man $< > $@
+
+    
+	The docbook-to-man binary is found in the docbook-to-man package.
+	Please remember that if you create the nroff version in one of the
+	debian/rules file targets (such as build), you will need to include
+	docbook-to-man in your Build-Depends control field.
+
+  -->
+
+  <!-- Fill in your name for FIRSTNAME and SURNAME. -->
+  <!ENTITY dhfirstname "<firstname>MARTIN</firstname>">
+  <!ENTITY dhsurname   "<surname>POVOLNY</surname>">
+  <!-- Please adjust the date whenever revising the manpage. -->
+  <!ENTITY dhdate      "<date>march 21, 2006</date>">
+  <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
+       allowed: see man(7), man(1). -->
+  <!ENTITY dhsection   "<manvolnum>1</manvolnum>">
+  <!ENTITY dhemail     "<email>martin.povolny@solnet.cz</email>">
+  <!ENTITY dhusername  "Martin Povolny">
+  <!ENTITY dhucpackage "<refentrytitle>LNBACKUP</refentrytitle>">
+  <!ENTITY dhpackage   "lnbackup">
+
+  <!ENTITY debian      "<productname>Debian</productname>">
+  <!ENTITY gnu         "<acronym>GNU</acronym>">
+]>
+
+<refentry>
+  <refentryinfo>
+    <address>
+      &dhemail;
+    </address>
+    <author>
+      &dhfirstname;
+      &dhsurname;
+    </author>
+    <copyright>
+      <year>2004</year>
+      <holder>&dhusername;</holder>
+    </copyright>
+    &dhdate;
+  </refentryinfo>
+  <refmeta>
+    &dhucpackage;
+
+    &dhsection;
+  </refmeta>
+  <refnamediv>
+    <refname>&dhpackage;</refname>
+
+    <refpurpose>hardlink backup system for hard drives</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+
+      <arg><option>--backup-name <replaceable>my_backup</replaceable></option></arg>
+
+      <arg><option>--backup</option></arg>
+      <arg><option>--mount</option></arg>
+      <arg><option>--umount</option></arg>
+      <arg><option>--mirror-only</option></arg>
+
+      <arg><option>--status</option></arg>
+      <arg><option>--nagios</option></arg>
+      <arg><option>--nagios-all</option></arg>
+
+      <arg><option>--config-dir <replaceable>config_dir</replaceable></option></arg>
+      <arg><option>--log-level <replaceable>log_level</replaceable></option></arg>
+      <arg><option>--log-file <replaceable>log_file</replaceable></option></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>lnmount</command>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>lnumount</command>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1>
+    <title>DESCRIPTION</title>
+
+    <para>This manual page documents briefly the
+      <command>lnbackup</command> command.</para>
+
+    <para><command>lnbackup</command> is a hardlink backup system for hard drives. It creates incremental backups using hardlinks so that each backup seems like a full backup.</para>
+
+    <para><command>lnbackup</command> can be used to make backup of whole system or selected directories.</para>
+
+    <para><command>lnbackup</command> is usually used to create backups on a separate disk or partition, but it can also operate on o directory, both localy or remotely e.g. over NFS.</para>
+
+    <para>Optionally <command>lnbackup</command> can create bootable mirror.</para>
+
+    <para><command>lnmount</command> and <command>lnumount</command> are shortcut wrappers for <command>lnbackup --mount</command> and <command>lnbackup --umount</command> respectively. All arguments given to <command>lnmount</command> are passed to <command>lnbackup</command>.</para>
+  </refsect1>
+  <refsect1>
+    <title>OPTIONS</title>
+
+    <para>These programs follow the usual GNU command line syntax,
+      with long options starting with two dashes (`-').  Description of
+      options is included below.</para>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>--backup-name</option>
+        </term>
+        <listitem>
+          <para>Give a name of pre-configured backup (defaults to 'localhost').</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-l</option>
+          <option>--log-file <replaceable>FILE</replaceable></option>
+        </term>
+        <listitem>
+          <para>Set log file (defaults to /var/log/lnbackup).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-v</option>
+          <option>--log-level <replaceable>LEVEL</replaceable></option>
+        </term>
+        <listitem>
+          <para>Set level of debug information. One of debug, [info], warn, error, fatal. Defaults to info.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-c</option>
+          <option>--config-dir <replaceable>PATH</replaceable></option>
+        </term>
+        <listitem>
+          <para>Set config directory where configuration of individual backups as well as global configuration is stored. Defaults to /etc/lnbackup.d/.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-t</option>
+          <option>--test</option>
+        </term>
+        <listitem>
+          <para>Run in test mode (no action is done). Useful together with <option>-v debug</option> when debugging backup configuration. Allows you to see what actions would be done.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-m</option>
+          <option>--no-mirror</option>
+        </term>
+        <listitem>
+          <para>Don't create mirror even when mirroring is configured.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--mirror-only</option>
+        </term>
+        <listitem>
+          <para>Create only bootable mirror from latest backup.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-s</option>
+          <option>--status</option>
+        </term>
+        <listitem>
+          <para>Report status for given backup.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--backup</option>
+        </term>
+        <listitem><para>Run given backup.</para></listitem>
+      </varlistentry>
+      <varlistentry><term><option>--mount</option></term><listitem><para>Mount given backup.</para></listitem></varlistentry>
+      <varlistentry><term><option>--umount</option></term><listitem><para>Unmount given backup.</para></listitem></varlistentry>
+      <varlistentry><term><option>--nagios</option></term>
+        <listitem>
+          <para>Give short status for given backup information suitable for monitoring system Nagios. Also returns exit codes like Nagios plugins.</para>
+          <para>0 -- ok, 1 -- warning, 2 -- error.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry><term><option>--nagios-all</option></term>
+        <listitem>
+          <para>Same as <option>--nagios</option> except it gives status of all configured backups (in given backup config directory) that do not have the key :dont_check set to true value.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--init-crypto=<replaceable>SIZE</replaceable></option>
+        </term>
+        <listitem>
+          <para>Initialize crypto device (optional size applies to loopback file size). See section <link linkend='encbackup'>ENCRYPTED BACKUPS</link> for more information.</para>
+          <para>This command creates encrypted loopback device and formats it as ext3 filesystem to ease the process of creating encrypted backup. USE WITH MAXIMAL CARE.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1>
+    <title>EXAMPLES</title>
+    <variablelist>
+      <varlistentry>
+        <term>lnbackup --backup</term>
+        <listitem>
+          <para>Run backup 'localhost'.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>lnbackup --backup --backup-name backup2 -v debug -t</term>
+        <listitem>
+          <para>Run backup 'backup2', set loglevel to 'debug' (highest), and run in test mode (don't do anything, just pretend and log).</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id='config'>
+    <title>BASIC CONFIGURATION</title>
+
+    <para>By default config files are stored in /etc/lnbackup.d/. Configuration consists of individual config files, some of which are global, like file 00global, other define individual backups, like 01localhost.</para>
+    <para>File <command>00global</command> is in Debian maintained by <command>debconf</command> and defines basic values such as backup mountpoint, backup disk and backup partition. These values are global for all defined backups, but can be overriden in config files of individual backups.</para>
+    <para>All configuration files are Ruby hashes. When <command>lnbackup</command> starts it merges all config files into one config hash. Reason for this is to allow some files to be maintained by hand and others by system or let backup config files be added by other packages.</para>
+    <para>If you redefine some key defined in one file in another file, keep in mind that config files are merged in order given by numerical value of the first two letters of their names.</para>
+    
+    <para>File <command>00global</command> file might look like this:
+<programlisting>
+|    {
+|        :device            => '/dev/hdc1',
+|        :disk              => '/dev/hdc',
+|        :mount_point       => '/mnt/backup',
+|        :files_reserved    => '0',
+|        :blocks_reserved   => '0',
+|    } 
+</programlisting>
+    This says, that backup device will be <command>/dev/hdc1</command>, this device will be mounted on <command>/mnt/backup</command>. And it is part of device <command>/dev/hdc</command>. Device <command>/dev/hdc</command> will be the device for <command>lilo</command> to write boot sector if some backup is configured to create bootable mirrors.
+    </para>
+    <para>Backups will be stored under this mountpoint in directory structure of the form /mnt/backup/YYYY/MM/DD/backup_name/ or alternatively /mnt/backup/YYYY/MM/DD/HH/backup_name/.</para>
+    <para></para>
+
+    <para>Default configuration file <command>01localhost</command>, which defines backup of whole system looks like this:
+<programlisting>
+|   {
+|     :localhost => {
+|       :dirs => [
+|         { :dir => '/',     :fs_type => :single,       # don't backup data below mountpoints
+|           :exclude => [ 'tmp/.', 'backup/.' ]
+|         },
+|         { :dir => '/boot', :fs_type => :single },
+|         { :dir => '/usr',  :fs_type => :local  },     # don't backup if mounted over network
+|         { :dir => '/var',  :fs_type => :local, 
+|           :exclude => ['cache/apt/archives/.*deb', 'spool/squid/.']
+|         },
+|         { :dir => '/home', :fs_type => :local },
+|         { :dir => '/opt',  :fs_type => :local },
+|       ],
+|       :mirror => true,
+|       :monitor => {                                   # set age of backup for warning and error 
+|         :warn     => 26,                              #        status in nagios (time in hours)
+|         :error    => 50,
+          :no_mirror_warn => true,                      # no warning on missing mirrror
+|       }
+|     },
+|   }
+</programlisting></para>
+  <para>The key :localhost says, that we define backup named "localhost". It is a good idea to name the file with backup definition with the name of the backup. Number 01 preceding the backup name defines order in which the configuration file is merged into program's configuration as described above.</para>
+  <para>The key :dirs defines list of directories to be included in the backup and says what rules apply to this directory.</para>
+  <para>The key :mirror says that we want <command>lnbackup</command> to make bootable mirror from this backup. Be <emp>very carefull</emp> when using this option, because you can easily <emp>erase your data</emp> if you do this wrong! See section <link linkend="bootable">BOOTABLE MIRRORS</link> for details.</para>
+  <para>Definition of directory to be backuped consists of 3 keys:</para>
+  <itemizedlist>
+    <listitem><para>:dir -- full path to the directory to be backuped.</para></listitem>
+    <listitem><para>:fs_type -- used to control behaviour on filesystem border.</para>
+      <itemizedlist>
+        <listitem><para>:all -- backup all filesystems.</para></listitem>
+        <listitem><para>:local -- backup local filesystem.</para></listitem>
+        <listitem><para>:single -- backup only one filesystem (same as '-x' in <command>find</command>).</para></listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem><para>:exclude -- list of directories relative to :dir to be excluded from backup.</para></listitem>
+  </itemizedlist>
+  <para>When backing up files in directory the most specific :dir entry takes precedence. E.g. if backing up files in directory under /var/lib/ rules for /var take precedence over rules for /.</para>
+  </refsect1>
+  <refsect1 id='bootable'>
+    <title>BOOTABLE MIRRORS</title>
+    <para><command>lnbackup</command> can save your day, if you use bootable mirrors. In that case you can simply boot the backup disk in case when master disk fails. We use <command>lnbackup</command> this way on almost all servers we maintain.</para>
+
+    <para>Bootable mirrors work in this way:</para>
+    <orderedlist>
+      <listitem><para>Normal backup is done the same way as without bootable mirror.</para></listitem>
+      <listitem><para>After normal backup is done, the root directory of backups is <emp>erased</emp> except for directory 'backup'.</para></listitem>
+      <listitem><para>Then the last backup is hardlinked into the root of the backup device. Then <command>/etc/fstab</command> on the backup device is generated.</para></listitem>
+      <listitem><para>Finally, unless given backup has key :skip_lilo set to true value, <command>lilo</command> is called to make backup disk bootable.</para></listitem>
+    </orderedlist>
+    <para>The key :skip_lilo comes in handy when you use boot loader such as <command>grub</command> which doesn't need to be updated each time when location of kernel image, initramdisk, etc. is chanded. With <command>grub</command> it is enough to make the backup disk bootable only once -- when you setup <command>lnbackup</command> for the first time.</para>
+
+    <para>As a security ensurance <command>lnbackup</command> will refuse to create a mirror if you do not specify a device and partition.</para>
+  </refsect1>
+  <refsect1 id='nodevice'>
+    <title>LNBACKUP WITHOUT DEDICATED BACKUP DISK</title>
+    <para>Although not recomended, it is possible to use lnbackup without a dedicated backup disk.</para>
+
+    <para>In this case specify the directory where backups should be stored as ':mount_point' in the configuration file and enter an empty string as backup device and partition (':device' and ':disk).</para>
+    <para><emp>Never use mirror option</emp> when using single disk for backups and other data.</para>
+    <para>Also don't forget to specify the percentage of blocks and inodes that should lnbackup leave free (':blocks_reserved', ':files_reserved'.</para>
+  </refsect1>
+
+  </refsect1>
+  <refsect1 id='encbackup'>
+    <title>ENCRYPTED BACKUPS</title>
+    <para>
+      <command>&dhpackage;</command> supports encrypted backups via <command>loop</command>, <command>cryptoloop</command> and cipher (e.g. <command>aes</command>) kernel modules.
+    </para>
+
+    <para>Encrypted backup devices cannot be used as bootable mirrors.</para>
+
+    <para>
+      Configuration fragment for encrypted backups might look like this (file <command>00crypto</command>).
+<programlisting>
+|   {
+|       :crypto => 'aes256',
+|       :password => 'somelongpassphrase',
+|   }
+</programlisting>
+      This configuration fragment says, that kernel cipher <command>aes256</command> will be used (must be present in running kernel in the time of backup) and gives the passhprase for the cipher.
+    </para>
+  </refsect1>
+  <refsect1 id='labels'>
+    <title>USING LABELS</title>
+    <para>Lnbackup can be configured to locate backup disk using ext3 filesystem labels or UUIDs.
+    </para>
+    <para>
+      You can use <command>tune2fs</command> to label filesystems. E.g. to
+      label filesystem /dev/sdb1 with label BACKUP run the following command:
+      <command>tune2fs -L BACKUP /dev/sdb1</command>.
+    </para>
+
+    <para>
+      Example configuration for using filesystem labels.
+      <command>/etc/lnbackup.d/00global</command>
+      <programlisting>
+|      {
+|        :device      => '/dev/sd[c-z]*1',
+|        :disk        => '/dev/sd[c-z]*',
+|        :mount_point => '/mnt/backup',
+|        :files_reserved  => '2%',
+|        :blocks_reserved => '2%',
+|      }
+      </programlisting>
+      <command>/etc/lnbackup.d/01localhost</command>
+      <programlisting>
+|      {
+|        :localhost => {
+|          :dirs => [ { :dir => '/', :fs_type => :single, 
+|                       :exclude => [ 'tmp/.', 'backup/.' ] } ]
+|          :device_label => 'BACKUP_SW_.*',
+|        },
+|      }
+      </programlisting>
+    </para>
+
+    <para>
+        CAUTION: It is not currently possible to use encrypted backup together with labels.
+    </para>
+ 
+  </refsect1>
+  <refsect1>
+    <title>SEE ALSO</title>
+
+    <para>Configuration files in /etc/lnbackup.d/.</para>
+
+    <para>Czech manual is also available. See
+    <citetitle>lnbackup-manual.cz.txt</citetitle> located in
+    /usr/share/doc/lnbackup-ng/.</para>
+  </refsect1>
+  <refsect1>
+    <title>AUTHOR</title>
+
+    <para>This manual page was written by &dhusername; (&dhemail;). Permission is
+    granted to copy, distribute and/or modify this document under the terms of
+    the <acronym>GNU</acronym> Free Documentation License, Version 1.1 or any
+    later version published by the Free Software Foundation; with no Invariant
+    Sections, no Front-Cover Texts and no Back-Cover Texts.</para>
+
+  </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->
+
+

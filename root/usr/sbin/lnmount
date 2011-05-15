@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ "$1" == "--help" ]; then
+  echo "usage: $0 [--rw] [lnbackup arguments]"
+  echo
+  echo "shortcut for mounting lnbackup backups"
+  exit 0
+fi
+
+if [ "$1" == "--rw" -o "$1" == "--mountrw" ]; then
+  shift
+  /usr/sbin/lnbackup --mountrw --log-file - "$@"
+else
+  /usr/sbin/lnbackup --mount --log-file - "$@"
+fi
+

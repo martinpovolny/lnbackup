@@ -1,0 +1,17 @@
+Source: lnbackup-ng
+Section: unknown
+Priority: optional
+Maintainer: Martin Povolny <Martin.Povolny@solnet.cz>
+Build-Depends: debhelper (>> 3.0.0)
+Standards-Version: 3.5.2
+
+Package: lnbackup-ng
+Architecture: any
+Depends: libfilesystem-ruby1.8, ruby1.8, libacl-ruby1.8
+Recommends: loop-aes-utils
+Conflicts: lnbackup
+Description: hardlink backup system
+ Backup system based on hardlinks. 
+ Creates directories with backups for each day, hardlinking unchanged files.
+ Removes automatically oldest backup if it runs out of space. 
+ Has options to make a bootable copy of the filesystem it backups.

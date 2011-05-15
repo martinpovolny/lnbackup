@@ -1,0 +1,8 @@
+informace o velikostech zaloh human-readable, 
+informace o velikosti zaloh v minulosti
+kontrola, ze se jedna o spravny disk
+doresit GRUB
+dodelat xattr, ACL
+hard links
+hledat soubor i v drivejsich zalohach, pokud neni v posledni.... (alespon jeste o jednu dozadu....)
+

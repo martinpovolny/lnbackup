@@ -1,0 +1,11 @@
+{
+  :chroot => {
+    :dirs => [  
+      { :dir => '/var/tmp/ln_testing', :fs_type => :single,
+        :exclude => ['var/cache/apt/archives/.*deb', 'var/spool/squid/[A-Z0-9]*/[A-Z0-9]*/.']
+      },
+    ],
+    :target_dir     =>  '/var/tmp/ln_testing/mnt/backup',
+    :dont_check     =>  true,
+  },
+}

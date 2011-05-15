@@ -1,0 +1,5 @@
+{
+  :device        => '/dev/hdc1',
+  :disk          => '/dev/hdc',
+  :mount_point   => '/mnt/backup',
+} 

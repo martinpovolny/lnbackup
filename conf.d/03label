@@ -1,0 +1,18 @@
+{
+  :localhost => {
+    :dirs => [
+      { :dir => '/',     :fs_type => :single,       # nezalohujeme zadne mount pointy
+        :exclude => [ 'tmp/.', 'backup/.' ]
+      },
+      { :dir => '/boot', :fs_type => :single },
+      { :dir => '/usr',  :fs_type => :local  },     # chceme zalohovat, pokud neni pres sit
+      { :dir => '/var',  :fs_type => :local, 
+        :exclude => ['cache/apt/archives/.*deb', 'spool/squid/.']
+      },
+      { :dir => '/home', :fs_type => :local },
+      { :dir => '/opt',  :fs_type => :local },
+    ],
+    :mirror => false,
+    :device_label => 'MUFF1',
+  },
+}

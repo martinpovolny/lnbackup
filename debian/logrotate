@@ -1,0 +1,17 @@
+/var/log/lnbackup {
+	weekly
+	missingok
+	rotate 10
+	compress
+	delaycompress
+	create 640 root adm
+}
+
+/var/log/lnbackup_out {
+	weekly
+	missingok
+	rotate 10
+	compress
+	delaycompress
+	create 640 root adm
+}
