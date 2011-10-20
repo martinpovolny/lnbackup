@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/usr/sbin/lnbackup --umount --log-file - "$@"
+

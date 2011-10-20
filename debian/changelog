@@ -1,3 +1,11 @@
+lnbackup-ng (2.0.0) 2010Q1; urgency=low
+
+  * refactor structure of sources
+  * some code refactoring
+  * fix: create lock file after running pre-command
+
+ -- Martin Povolny <martin.povolny@solnet.cz>  Thu, 20 Oct 2011 13:38:30 +0200
+
 lnbackup-ng (1.28.10) 2010Q1; urgency=low
 
   * add mysql and postgresql backup script

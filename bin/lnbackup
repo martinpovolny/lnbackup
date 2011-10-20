@@ -1,0 +1,186 @@
+#!/usr/bin/ruby1.8
+
+require 'lnbackup'
+require 'optparse'
+
+def go
+  debug_levels = {
+    :debug => Logger::DEBUG,
+    :info  => Logger::INFO,
+    :warn  => Logger::WARN,
+    :error => Logger::ERROR,
+    :fatal => Logger::FATAL,
+  }
+  backup_name       = 'localhost'
+  log_level         =  Logger::INFO
+  test_mode         =  false
+  config_dir        =  LnBackup::CONFIG_D
+  log_file          =  LnBackup::LOG_FILE
+  status_file_pref  =  LnBackup::STATUS_FILE_PREF
+  status            =  false
+  mount             =  false
+  mountrw           =  false
+  umount            =  false
+  no_mirror         =  false
+  nagios            =  false
+  nagios_all        =  false
+  source_prefix     =  nil
+  target_dir_name   =  nil
+  mirror_only       =  nil
+  backup            =  nil
+  pc_test           =  nil
+  pc_backup         =  nil
+  init_crypto       =  nil
+  crypto_size       =  0
+  pcs_status_f      =  LnBackup::PCS_STATUS
+  pcs_status        =  nil
+  delay             =  nil
+  delay_denom       =  nil
+  no_delete         =  nil
+  no_acl            =  nil
+  bin_log           =  nil
+  max_iter          =  5
+  
+  ARGV.options do |p|
+    p.banner = "Usage: #{$0} [options]\n"
+    p.on(      '--backup-name=NAME',        String, "name of backup configuration (#{backup_name})") { |backup_name|}
+    p.on('-l', '--log-file=FILE',           String, "file for logging (#{log_file})") { |log_file| }
+    p.on(      '--status-file-pref=FILE',   String, "prefix for file to store backup status (#{status_file_pref}), backup name will be added") { |status_file_pref| }
+    p.on('-v', '--log-level=LEVEL',         String, 'set log level: debug,[info],warn,error,fatal') { |log_level| 
+      symb = log_level.downcase.intern
+      if debug_levels.has_key?(symb)
+        log_level = debug_levels[symb]
+      else
+        puts p
+        puts "Invalid log level #{log_level}"
+        exit(1)
+      end
+    } 
+    p.on('-c', '--config-dir=PATH',       String, 'configuration directory')            { |config_dir| }
+    p.on('-t', '--test',                          'dry run (test mode)')                { |test_mode| }
+    p.on('-m', '--no-mirror',                     'skip creation of bootable mirror after backup') { |no_mirror| }
+    p.on('-s', '--status',                        'display lnbackup status information including list of available backups') { |status| }
+    p.on(      '--backup',                        'run backup')                         { |backup| }
+    p.on(      '--mount',                         'mount backup device ro')             { |mount| }
+    p.on(      '--mountrw',                       'mount backup device rw')             { |mountrw| }
+    p.on(      '--umount',                        'umount backup device')               { |umount| }
+    p.on(      '--nagios',                        'run as nagios plugin')               { |nagios| }
+    p.on(      '--dump-log=FILE',         String, 'parse bin. log and dump to STDOUT')  { |bin_log| }
+    p.on(      '--nagios-all'                     'run as nagios plugin for all backups config directory') { |nagios_all| }
+    p.on(      '--source-prefix=DIR',     String, 'prefix the source directory given by configuration')    { |source_prefix| }
+    p.on(      '--target-dir-name=NAME',  String, 'set backup target directory under backup root ([backup-name] if not given)') { |target_dir_name| }
+    p.on(      '--mirror-only',                   'only create bootable mirror from last backup')          { |mirror_only| }
+
+    p.on(      '--pc-backup',                     'run backup of PCs')                                  { |pc_backup| }
+    p.on(      '--pc-mount-test',                 'test if PCs configured for backup are accessible')   { |pc_test| }
+    p.on(      '--pc-status',                     'display PCs backup status')   { |pcs_status| }
+    p.on(      '--pc-status-file=FILE',   String, 'PCs backup status file') { |pcs_status_f| }
+
+    p.on('--init-crypto[=SIZE]',        'initialize crypto loop device, optional SIZE in MB (ignored if block device)') { |crypto_size| init_crypto = true } 
+    p.on('--delay=FLOAT',             'delay (sec) between processing objects') { |delay| delay = delay.to_f }
+    p.on('--delay-denom=N',           'apply delay every N objects') { |delay_denom| delay_denom = delay_denom.to_i }
+    p.on('--no-delete',               'don\'t remove old backups, return error when out of space') { |no_delete| no_delete = true }
+    p.on('--no-acl',                  'don\'t restore ACL, don\'t generate fstab with ACL options') { |no_acl| no_acl = true }
+    p.on('--version',                 'display help') { puts p; exit(1) }
+    p.on('--help',                    'display help') { puts p; exit(1) }
+    p.on('--search-iter=NUMBER',      'number of backups to search for files not contained in the last backup (0 for unlimited, default 5)') { |mi| max_iter = mi.to_i }
+    begin
+      p.parse!(ARGV)
+    rescue
+      puts p
+      exit(1)
+    end
+    if ( not status and not backup and not mount and not mountrw and not umount and not nagios and not nagios_all and
+         not pc_test and not pc_backup and not init_crypto and not pcs_status and not mirror_only and not bin_log )
+      puts p
+      exit(1)
+    end
+  end
+
+  if bin_log
+    Marshal.restore( File.read(bin_log) ).each { |st| st.each_pair { |k,v| puts "#{k+' '*(30-k.length)}:\t#{v}" if k }; puts }
+    exit
+  end
+
+  target_dir_name = backup_name unless target_dir_name
+  
+  lnbackup = LnBackup.new( :log_level         => log_level,
+                           :log_file          => log_file,
+                           :test_mode         => test_mode,
+                           :config_dir        => config_dir,
+                           :status_file_pref  => status_file_pref,
+                           :source_prefix     => source_prefix,
+                           :target_dir_name   => target_dir_name,
+                           :delay             => delay,
+                           :delay_denom       => delay_denom,
+                           :no_delete         => no_delete,
+                           :no_acl            => no_acl,
+                           :max_iter          => max_iter
+                       )
+
+  res = 0
+  if status
+    # display status
+    lnbackup.backup_status( backup_name, status_file_pref )
+
+  elsif nagios
+    # run nagios check
+    res, message = lnbackup.nagios_check( backup_name )
+    puts message
+
+  elsif nagios_all
+    # run nagios check
+    res, message = lnbackup.nagios_check_all
+    puts message
+
+  elsif mount
+    # mount backup ro
+    return res if (res = lnbackup.config_init(backup_name)) != 0
+    lnbackup.mount_backup(false)
+
+  elsif mountrw
+    # mount backup rw
+    return res if (res = lnbackup.config_init(backup_name)) != 0
+    lnbackup.mount_backup
+
+  elsif umount
+    # umount backup
+    return res if (res = lnbackup.config_init(backup_name)) != 0
+    lnbackup.umount_backup(true)
+    
+  elsif mirror_only
+    # create only bootable mirror
+    return res if (res = lnbackup.config_init(backup_name)) != 0
+    return lnbackup.mirror_only( backup_name )
+
+  elsif backup
+    # run backup
+    res = lnbackup.go_backup( backup_name, no_mirror )
+
+  elsif pc_backup
+    # run PCs backup -- backup PCs over cifs
+    lnbackup.backup_pcs( pcs_status_f, no_delete )
+
+  elsif pc_test
+    # run PCs backup test -- test if shares for backup are accessible
+    lnbackup.backup_pcs_test
+
+  elsif init_crypto
+    # initialize crypto device
+    lnbackup.crypto_init(crypto_size)
+
+  elsif pcs_status
+    lnbackup.backup_pcs_status( pcs_status_f )
+    
+  else
+    puts "Ups, we should never get here!"
+    exit(1)
+  end
+
+  return res
+end
+
+if $0 == __FILE__
+  exit go
+end
+
