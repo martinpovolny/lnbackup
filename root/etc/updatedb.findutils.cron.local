@@ -1,3 +1,0 @@
-# paths which are pruned from updatedb database
-PRUNEPATHS="/mnt /tmp /usr/tmp /var/tmp /afs /amd /alex /var/spool /sfs /media /mnt/backup /backup"
-export PRUNEPATHS

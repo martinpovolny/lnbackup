@@ -1,4 +1,0 @@
-#databaze ktere se nebudou zalohovat jsou uvedeny v promennych SKIP_POSTGRESQL pro postgres databaze a SKIP_MYSQL pro mysql databaze
-SKIP_POSTGRESQL="" #defaultne se preskakuje template0
-SKIP_MYSQL=""
-
