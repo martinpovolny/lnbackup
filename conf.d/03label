@@ -1,5 +1,5 @@
 {
-  :localhost => {
+  :localhost2 => {
     :dirs => [
       { :dir => '/',     :fs_type => :single,       # nezalohujeme zadne mount pointy
         :exclude => [ 'tmp/.', 'backup/.' ]

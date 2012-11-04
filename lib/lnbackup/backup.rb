@@ -1,4 +1,4 @@
-class LnBackup
+module LnBackup
   CONFIG_D         = '/etc/lnbackup.d/'
   LOG_FILE         = '/var/log/lnbackup'
   STATUS_FILE_PREF = '/var/log/lnbackup.status'
@@ -36,6 +36,8 @@ class LnBackup
     PIDFILE_FAILED        => 'failed to create pid/lock file'
   }
 
+class LnBackup
+
   attr :stats
 
   def conf_val(key)
@@ -46,6 +48,7 @@ class LnBackup
   #### inicializace a konfigurace ####
   def load_config
     @config = {}
+    p "config dir: #{@config_dir}"
     @log.debug { "config dir: #{@config_dir}" }
     Dir[(@config_dir+File::SEPARATOR).squeeze('/')+'*'].sort { |a,b| 
       a.split(File::SEPARATOR)[-1][1..2].to_i <=> b.split(File::SEPARATOR)[-1][1..2].to_i 
@@ -87,6 +90,7 @@ class LnBackup
       $stderr.puts "Exception #{e.class.to_s}: #{e.message}."
       $stderr.puts "\tUsing STDERR for logging."
       @log = Logger.new( STDERR )
+      @log.debug("TEST")
     end
     @log.level = log_level
     @log.info { "Running in test mode." } if @test_mode
@@ -368,7 +372,7 @@ class LnBackup
   
     pid = nil
     begin
-      Thread.critical = true
+      #Thread.critical = true # FIXME
       STDOUT.flush
       STDERR.flush
   
@@ -387,7 +391,7 @@ class LnBackup
         end
       }
     ensure
-      Thread.critical = false
+      #Thread.critical = false # FIXME
     end
   
     pipe_peer_in.close
@@ -731,9 +735,9 @@ class LnBackup
 
   def umount_fsck_mount
     if umount_backup
-      check_fsck or return print_error_stats( LnBackup::FSCK_FAILED )
+      check_fsck or return print_error_stats( FSCK_FAILED )
     end
-    mount_backup or return print_error_stats( LnBackup::MOUNT_FAILED )
+    mount_backup or return print_error_stats( MOUNT_FAILED )
     return 0
   end
   
@@ -744,7 +748,7 @@ class LnBackup
     end
 
     res = run_backup
-    if (res == LnBackup::BACKUP_OK)
+    if (res == BACKUP_OK)
       # pokud probehla v poradku 1. faze muzeme pokracovat mirrorem
       if not no_mirror
         mirror_res = create_mirror
@@ -1726,7 +1730,7 @@ class LnBackup
       end
       cmd << '-o' << 'acl,user_xattr' if $HAVE_ACL and not @no_acl
 
-      cmd << '-t' << fstype
+      cmd << '-t' << fstype unless fstype.to_s.empty?
 
       ret, out, err = 
           crypto ? system_catch_stdin_stderr_with_input( 
@@ -1780,7 +1784,7 @@ class LnBackup
   end
 
   def mirror_only( backup_name )
-    return LnBackup::MOUNT_FAILED unless mount_backup
+    return MOUNT_FAILED unless mount_backup
   
     mirror_res = do_mirror_only( backup_name )
     res        = mirror_res unless mirror_res == nil
@@ -1932,4 +1936,4 @@ class LnBackup
     end
   end
 end
-
+end

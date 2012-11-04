@@ -59,11 +59,6 @@ class Hash
       end
     end
   end
-  
-  # kompatibilita 1.6 <--> 1.8
-  if not Hash.instance_methods.index('values_at')
-    alias values_at indices
-  end
 end
 
 class SysCopyFailure < StandardError
