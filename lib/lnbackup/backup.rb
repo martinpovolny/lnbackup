@@ -184,13 +184,13 @@ class LnBackup
   def do_cp_dir(src, dest)
     find_exclude?(src + '/')
 
-    @log.debug { "File.mkpath #{dest}" }
+    @log.debug { "FileUtils.mkpath #{dest}" }
 
     if !@test_mode
       begin
-        File.mkpath(dest)
+        FileUtils.mkpath(dest)
       rescue Errno::ENOSPC
-        @log.info { "File.mkpath: Errno::ENOSPC (#{src}), making space..." }
+        @log.info { "FileUtils.mkpath: Errno::ENOSPC (#{src}), making space..." }
         make_some_space and retry
       end
     end
@@ -372,26 +372,25 @@ class LnBackup
   
     pid = nil
     begin
-      #Thread.critical = true # FIXME
-      STDOUT.flush
-      STDERR.flush
+      Thread.exclusive do
+        STDOUT.flush
+        STDERR.flush
   
-      pid = fork {
-        STDIN.reopen(pipe_peer_in)
-        STDOUT.reopen(pipe_peer_out)
-        STDERR.reopen(pipe_peer_error_out)
-        pipe_me_out.close
-        pipe_me_in.close
-        pipe_me_error_in.close
+        pid = fork {
+          STDIN.reopen(pipe_peer_in)
+          STDOUT.reopen(pipe_peer_out)
+          STDERR.reopen(pipe_peer_error_out)
+          pipe_me_out.close
+          pipe_me_in.close
+          pipe_me_error_in.close
   
-        begin
-          exec(*args)
-        rescue
-          exit!(255)
-        end
-      }
-    ensure
-      #Thread.critical = false # FIXME
+          begin
+            exec(*args)
+          rescue
+            exit!(255)
+          end
+        }
+      end  
     end
   
     pipe_peer_in.close
@@ -418,26 +417,25 @@ class LnBackup
   
     pid = nil
     begin
-      Thread.critical = true
-      STDOUT.flush
-      STDERR.flush
+      Thread.exclusive do
+        STDOUT.flush
+        STDERR.flush
   
-      pid = fork {
-        STDIN.reopen(pipe_peer_in)
-        STDOUT.reopen(pipe_peer_out)
-        STDERR.reopen(pipe_peer_error_out)
-        pipe_me_out.close
-        pipe_me_in.close
-        pipe_me_error_in.close
+        pid = fork {
+          STDIN.reopen(pipe_peer_in)
+          STDOUT.reopen(pipe_peer_out)
+          STDERR.reopen(pipe_peer_error_out)
+          pipe_me_out.close
+          pipe_me_in.close
+          pipe_me_error_in.close
   
-        begin
-          exec(*args)
-        rescue
-          exit!(255)
-        end
-      }
-    ensure
-      Thread.critical = false
+          begin
+            exec(*args)
+          rescue
+            exit!(255)
+          end
+        }
+      end
     end
   
     pipe_peer_in.close
@@ -608,7 +606,6 @@ class LnBackup
   end
 
   def copy_preserve( from, to )
-    to = File.catname( from, to )
     begin
       if not File.syscopy2( from, to )            # Errno::ENOSPC se siri ven
         File.unlink( to )
@@ -862,7 +859,7 @@ class LnBackup
         lock_file = File.open( lock_file_name, 'w' )
         lock_file.puts($$)
         lock_file.flush
-      rescue
+      rescue => e
         return PIDFILE_FAILED
       end
 
@@ -894,12 +891,14 @@ class LnBackup
       else
         begin
           begin
-            File.mkpath(@dest) unless @test_mode
+            FileUtils.mkpath(@dest) unless @test_mode
           rescue Errno::ENOSPC
             make_some_space and retry
           end
-        rescue
+        rescue => e 
           @log.fatal { "can't make backup dir '#{@dest}'" }
+          @log.fatal { "mkpath #{@dest} raised exception #{e.class}:'#{e.message}'" }
+          @log.fatal { e.backtrace.join("\n") }
           return NO_BACKUP_DIR
         end
       end
@@ -1806,7 +1805,7 @@ class LnBackup
       @log.info { "mounting #{host}" }
       mount_to = "#{@pcb[:mounts_root]}/#{host}"
       system_catch_stdin_stderr('umount', mount_to )
-      File.mkpath( mount_to )
+      FileUtils.mkpath( mount_to )
 
       pc_status[host] = Hash.new unless pc_status.key?(host)
       pc_status[host][:tried] = Time.now

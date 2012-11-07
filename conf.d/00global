@@ -1,5 +1,5 @@
 {
-  :device        => '/dev/loop0',
-  :disk          => '/dev/loop0',
+  :device        => '/dev/loop[0-9]',
+  :disk          => '/dev/loop[0-9]',
   :mount_point   => '/mnt/backup',
 } 

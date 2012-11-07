@@ -5,7 +5,6 @@ class File
   # and handles some extra error states
   #
   def File.syscopy2 from, to
-    to = catname(from, to)
     fsize = size(from)
     fsize = 1024 if fsize < 512
     fsize = TOO_BIG if fsize > TOO_BIG
