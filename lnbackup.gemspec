@@ -1,6 +1,8 @@
+require File.expand_path('../lib/lnbackup/version', __FILE__)
+
 spec = Gem::Specification.new do |s|
   s.name        = 'lnbackup'
-  s.version     = '2.0'
+  s.version     = LnBackup::VERSION
   s.summary     = "Hardlink backup system for hard drives."
   s.description = %{
 Lnbackup is a hardlink backup system for hard drives. 
@@ -14,13 +16,13 @@ Obviously the target filesystem of lnbackup needs to support hardlinks.
 It's run on ~200 servers for several years and it is considered stable.
 
 Read the man page for more information.}
+  s.add_runtime_dependency 'sys-filesystem'
+
   s.files               = Dir['lib/**/*.rb'] + Dir['bin/*'] #+ Dir['test/**/*.rb']
   s.require_path        = 'lib'
-  #s.autorequire         = 'builder'
   s.has_rdoc            = true
-  #s.extra_rdoc_files    = Dir['[A-Z]*']
   s.rdoc_options        << '--title' <<  'Lnbackup -- hardlink backup system for hard drives.'
   s.author              = "Martin Povolny"
-  s.email               = "martin.povolny@solnet.cz"
+  s.email               = "martin.povolny@gmail.com"
   s.homepage            = "https://github.com/martinpovolny/lnbackup"
 end
