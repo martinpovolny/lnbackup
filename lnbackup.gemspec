@@ -17,8 +17,10 @@ It's run on ~200 servers for several years and it is considered stable.
 
 Read the man page for more information.}
   s.add_runtime_dependency 'sys-filesystem'
+  s.add_runtime_dependency 'acl'
 
   s.files               = Dir['lib/**/*.rb'] + Dir['bin/*'] #+ Dir['test/**/*.rb']
+  s.executables         = Dir['bin/*']
   s.require_path        = 'lib'
   s.has_rdoc            = true
   s.rdoc_options        << '--title' <<  'Lnbackup -- hardlink backup system for hard drives.'

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+LNBACKUP=/usr/bin/lnbackup
+$LNBACKUP --status --log-file - "$@"
