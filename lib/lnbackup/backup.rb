@@ -1,3 +1,15 @@
+# encoding: UTF-8
+# ruby1.8 compat
+unless Thread.respond_to?(:exclusive)
+  class Thread
+    def self.exclusive
+      Thread.critical = true
+      yield
+      Thread.critical = false
+    end
+  end
+end
+
 module LnBackup
   CONFIG_D         = '/etc/lnbackup.d/'
   LOG_FILE         = '/var/log/lnbackup'
@@ -701,13 +713,20 @@ class LnBackup
     end
     # matchujeme
     @exclude_list.each do |a|
-      if (a[2] ? path : rel_path) =~ a[1] 
-        if a[0]
-          @log.debug { "excluding(#{a[1].source}): #{path}" }
-          Find.prune
-        else
-          return
+      begin
+        if (a[2] ? path : rel_path) =~ a[1] 
+          if a[0]
+            @log.debug { "excluding(#{a[1].source}): #{path}" }
+            Find.prune
+          else
+            return
+          end
         end
+      rescue => e
+        @log.warn { "problem with encoding --> not pruning" }
+        @log.warn { "pattern: #{a.inspect}, path: #{path.inspect}, rel_path: #{rel_path.inspect}, exception #{e.class}:'#{e.message}'" }
+        @log.warn { e.backtrace.join("\n") }
+        return
       end
     end
   end

@@ -1,3 +1,4 @@
+# encoding: UTF-8
 class FreeSpaceCalc
   def initialize( path, free_files=0, free_blocks=10, log=nil )
     @log = log

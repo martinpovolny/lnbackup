@@ -5,16 +5,14 @@ require 'lnbackup/version.rb'
 
 require 'find'
 require 'date'
-#require 'ftools'
 require 'fileutils'
 begin 
-  require 'filesystem'
-rescue LoadError
   require 'sys/filesystem'
   include Sys
   FileSystem = Filesystem
+rescue LoadError
+  require 'filesystem'
 end
-
 
 require 'logger'
 require 'time'
