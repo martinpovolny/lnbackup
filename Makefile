@@ -7,7 +7,7 @@ install:
 	cp conf.d/01localhost $(DESTDIR)/etc/lnbackup.d/
 	cp conf.d/30windows   $(DESTDIR)/etc/lnbackup.d/
 	cp conf.d/09pcb 	  $(DESTDIR)/etc/lnbackup.d/
-	mkdir -p $(DESTDIR)/usr/sbin
-	cp bin/* 	  		  $(DESTDIR)/usr/sbin/
+	mkdir -p $(DESTDIR)/usr/bin
+	cp bin/* 	  		  $(DESTDIR)/usr/bin/
 	mkdir -p $(DESTDIR)/usr/lib/ruby/1.8/
 	cp -r lib/*  		  $(DESTDIR)/usr/lib/ruby/1.8/

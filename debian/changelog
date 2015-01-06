@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.3) wheezy; urgency=low
+
+  * build after cleanup nad github sync
+
+ -- Martin Povolny <martin.povolny@solnet.cz>  Tue, 06 Jan 2015 12:42:08 +0100
+
 lnbackup-ng (2.0.2) wheezy; urgency=low
 
   * pridan Multi-Arch: foreign a architektura all (z puvodni any)

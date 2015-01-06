@@ -1,4 +1,4 @@
-Lnbackup is a hardlink backup system for hard drives. 
+Lnbackup is a hardlink backup system for hard drives.
 
 Lnbackup operates in a way similar to the '--link-dest' switch in rsync.
 
