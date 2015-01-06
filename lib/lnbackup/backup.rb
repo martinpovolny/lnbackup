@@ -1742,7 +1742,7 @@ class LnBackup
         if remount
           cmd << '-o' << 'remount,rw'
         end
-        cmd << '-o' << 'noatime'
+        cmd << '-o' << 'noatime,barrier=0'
       else
         cmd << '-o' << 'ro'
       end
