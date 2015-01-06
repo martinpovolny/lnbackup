@@ -1,3 +1,15 @@
+lnbackup-ng (2.0.2) wheezy; urgency=low
+
+  * pridan Multi-Arch: foreign a architektura all (z puvodni any)
+
+ -- Petr Jurasek <Petr.Jurasek@solnet.cz>  Fri, 02 Jan 2015 15:21:55 +0100
+
+lnbackup-ng (2.0.1) wheezy; urgency=low
+
+  * disable barrier in rw mode 
+
+ -- Petr Nesnidal <Petr.Nesnidal@solnet.cz>  Thu, 24 Oct 2013 14:47:05 +0200
+
 lnbackup-ng (2.0.0) 2010Q1; urgency=low
 
   * refactor structure of sources
