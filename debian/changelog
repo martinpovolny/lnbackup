@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.4) wheezy; urgency=low
+
+  * vynechan debug vystup v /usr/lib/ruby/1.8/lnbackup/backup.rb
+
+ -- Petr Jurasek <Petr.Jurasek@solnet.cz>  Wed, 07 Jan 2015 11:08:00 +0100
+
 lnbackup-ng (2.0.3) wheezy; urgency=low
 
   * build after cleanup nad github sync

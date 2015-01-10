@@ -60,10 +60,9 @@ class LnBackup
   #### inicializace a konfigurace ####
   def load_config
     @config = {}
-    p "config dir: #{@config_dir}"
     @log.debug { "config dir: #{@config_dir}" }
-    Dir[(@config_dir+File::SEPARATOR).squeeze('/')+'*'].sort { |a,b| 
-      a.split(File::SEPARATOR)[-1][1..2].to_i <=> b.split(File::SEPARATOR)[-1][1..2].to_i 
+    Dir[(@config_dir+File::SEPARATOR).squeeze('/')+'*'].sort { |a,b|
+      a.split(File::SEPARATOR)[-1][1..2].to_i <=> b.split(File::SEPARATOR)[-1][1..2].to_i
     }.each do |conf|
       next if conf =~ /\/[^\/]*\.[^\/]*$/
       if FileTest.file?(conf)
@@ -75,8 +74,8 @@ class LnBackup
     @config[:mount_point].gsub!(%r{(.)/$},'\1')
   end
 
-  def initialize( args={  :log_level        => Logger::INFO, 
-                          :test_mode        => false, 
+  def initialize( args={  :log_level        => Logger::INFO,
+                          :test_mode        => false,
                           :config_dir       => CONFIG_D,
                           :log_file         => LOG_FILE,
                           :status_file_pref => STATUS_FILE_PREF,
@@ -88,10 +87,10 @@ class LnBackup
                           :no_acl           => false,
                           :max_iter         => 5,
                       } )
-    log_level, @test_mode, config_dir, log_file, 
+    log_level, @test_mode, config_dir, log_file,
         @status_file_pref, @source_prefix, @target_dir_name, @delay, @delay_denom,
-            @no_delete, @no_acl, @max_iter = 
-          args.values_at( :log_level, :test_mode, :config_dir, :log_file, 
+            @no_delete, @no_acl, @max_iter =
+          args.values_at( :log_level, :test_mode, :config_dir, :log_file,
             :status_file_pref, :source_prefix, :target_dir_name, :delay, :delay_denom,
               :no_delete, :no_acl, :max_iter )
 
@@ -122,14 +121,14 @@ class LnBackup
     # otestujeme, jestli je definovana vybrana zaloha zadaneho jmena
     if not @config.key?(name)
       @log.fatal { "No config for backup '#{@backup_name}', exiting!" }
-      return INVALID_BACKUP 
+      return INVALID_BACKUP
     end
     @log.debug{ $HAVE_ACL ? "ACL support" : "no ACL support" }
 
     # @cur_config bude obsahovat konfiguraci vybrane zalohy
     @cur_config = @config[name]
     @cur_config[:mount_point].gsub!(%r{(.)/$},'\1') if @cur_config.key?(:mount_point)
-    
+
     # find partition by label if necessary
     if conf_val(:device_label) or conf_val(:device_uuid)
       label  = conf_val(:device_label) ? conf_val(:device_label) : conf_val(:device_uuid)
@@ -144,7 +143,7 @@ class LnBackup
     end
     return 0
   end
-  
+
   #### hledani starych backupu ####
   def find_backups( name=nil, any=false )               # TODO --- pripravit na moznost hodinovych zaloh
     dest   = nil
@@ -179,11 +178,11 @@ class LnBackup
 
     if !@test_mode
       ret, out, err = system_catch_stdin_stderr('/bin/cp', '-a', src, dest)
-      if ret != 0 
+      if ret != 0
         @log.info { "/bin/cp failed: '#{err}' (#{src}), making space..." }
 
         make_some_space if @space_calc.much_used?
-  
+
         ret, out, err = system_catch_stdin_stderr('/bin/cp', '-a', src, dest)
         if ret != 0
           @log.error { "do_cp_a: file copy failed ( '/bin/cp', '-a', #{src}, #{dest} ), out: #{out}, error: #{err}" }
@@ -192,7 +191,7 @@ class LnBackup
       end
     end
   end
-  
+
   def do_cp_dir(src, dest)
     find_exclude?(src + '/')
 
@@ -207,7 +206,7 @@ class LnBackup
       end
     end
   end
-  
+
   def do_hardlink(last, src, dest)
     find_exclude?(src)
 
@@ -274,7 +273,7 @@ class LnBackup
     end
     return true
   end
-  
+
   #
   # resolve symlinks in file path
   #
@@ -302,7 +301,7 @@ class LnBackup
 
   #### uvolnovani mista ####
   def make_space_for( path )
-    while not @space_calc.can_backup?(path) do 
+    while not @space_calc.can_backup?(path) do
       @log.debug { "make_space_for: Not enough space for #{path}, removing oldest." }
       remove_oldest
     end
@@ -331,9 +330,9 @@ class LnBackup
       end
       @log.debug { "not deleting #{backup}" }
     end
-    
+
     if oldest
-      oldest.sub!("/#{@backup_name}$",'') 
+      oldest.sub!("/#{@backup_name}$",'')
       if FileTest.directory?(oldest)
         @log.info { "free blocks: %s files: %s" % @space_calc.get_free }
         @log.info { "removing oldest: '#{oldest}'" }
@@ -352,7 +351,7 @@ class LnBackup
             Dir.rmdir(oldest)               # mazeme mesic
             oldest.sub!(%r'/\d\d$','')
             Dir.rmdir(oldest)               # mazeme rok
-          rescue 
+          rescue
             # odchytávame výjimku mazání neprázdného adresáře
           end
         end
@@ -377,62 +376,17 @@ class LnBackup
 
   def system_catch_stdin_stderr(*args)
     args = args.collect {|a| a.to_s}
-  
-    pipe_peer_in, pipe_me_out = IO.pipe
-    pipe_me_in, pipe_peer_out = IO.pipe
-    pipe_me_error_in, pipe_peer_error_out = IO.pipe
-  
-    pid = nil
-    begin
-      Thread.exclusive do
-        STDOUT.flush
-        STDERR.flush
-  
-        pid = fork {
-          STDIN.reopen(pipe_peer_in)
-          STDOUT.reopen(pipe_peer_out)
-          STDERR.reopen(pipe_peer_error_out)
-          pipe_me_out.close
-          pipe_me_in.close
-          pipe_me_error_in.close
-  
-          begin
-            exec(*args)
-          rescue
-            exit!(255)
-          end
-        }
-      end  
-    end
-  
-    pipe_peer_in.close
-    pipe_peer_out.close
-    pipe_peer_error_out.close
-    pipe_me_out.sync = true
-  
-    pipe_me_out.close
-    got_stdin = pipe_me_in.read
-    pipe_me_in.close unless pipe_me_in.closed?
-    got_stderr = pipe_me_error_in.read
-    pipe_me_error_in.close unless pipe_me_error_in.closed?
-  
-    p, status = Process.waitpid2(pid)
-    return [status >> 8, got_stdin, got_stderr]
-  end
 
-  def system_catch_stdin_stderr_with_input(input, *args)
-    args = args.collect {|a| a.to_s}
-  
     pipe_peer_in, pipe_me_out = IO.pipe
     pipe_me_in, pipe_peer_out = IO.pipe
     pipe_me_error_in, pipe_peer_error_out = IO.pipe
-  
+
     pid = nil
     begin
       Thread.exclusive do
         STDOUT.flush
         STDERR.flush
-  
+
         pid = fork {
           STDIN.reopen(pipe_peer_in)
           STDOUT.reopen(pipe_peer_out)
@@ -440,7 +394,7 @@ class LnBackup
           pipe_me_out.close
           pipe_me_in.close
           pipe_me_error_in.close
-  
+
           begin
             exec(*args)
           rescue
@@ -449,20 +403,65 @@ class LnBackup
         }
       end
     end
-  
+
     pipe_peer_in.close
     pipe_peer_out.close
     pipe_peer_error_out.close
-  
     pipe_me_out.sync = true
-    pipe_me_out.print( input ) if input != nil
+
     pipe_me_out.close
-    
     got_stdin = pipe_me_in.read
     pipe_me_in.close unless pipe_me_in.closed?
     got_stderr = pipe_me_error_in.read
     pipe_me_error_in.close unless pipe_me_error_in.closed?
-  
+
+    p, status = Process.waitpid2(pid)
+    return [status >> 8, got_stdin, got_stderr]
+  end
+
+  def system_catch_stdin_stderr_with_input(input, *args)
+    args = args.collect {|a| a.to_s}
+
+    pipe_peer_in, pipe_me_out = IO.pipe
+    pipe_me_in, pipe_peer_out = IO.pipe
+    pipe_me_error_in, pipe_peer_error_out = IO.pipe
+
+    pid = nil
+    begin
+      Thread.exclusive do
+        STDOUT.flush
+        STDERR.flush
+
+        pid = fork {
+          STDIN.reopen(pipe_peer_in)
+          STDOUT.reopen(pipe_peer_out)
+          STDERR.reopen(pipe_peer_error_out)
+          pipe_me_out.close
+          pipe_me_in.close
+          pipe_me_error_in.close
+
+          begin
+            exec(*args)
+          rescue
+            exit!(255)
+          end
+        }
+      end
+    end
+
+    pipe_peer_in.close
+    pipe_peer_out.close
+    pipe_peer_error_out.close
+
+    pipe_me_out.sync = true
+    pipe_me_out.print( input ) if input != nil
+    pipe_me_out.close
+
+    got_stdin = pipe_me_in.read
+    pipe_me_in.close unless pipe_me_in.closed?
+    got_stderr = pipe_me_error_in.read
+    pipe_me_error_in.close unless pipe_me_error_in.closed?
+
     p, status = Process.waitpid2(pid)
     return [status >> 8, got_stdin, got_stderr]
   end
@@ -529,7 +528,7 @@ class LnBackup
       dev = File.join('/dev', name)
       # test na masku
       next unless devices.index( dev )
-      
+
       if FileTest.blockdev?( dev )
         @log.debug( "find_dev_by: checking #{dev}" )
         dump = tune2fs( dev )
@@ -551,17 +550,17 @@ class LnBackup
     end
     return device
   end
-  
+
   #### pomocne rutiny pro praci s crypto loop ####
   def find_loop(max=8)
     ret, out, err = system_catch_stdin_stderr('/sbin/losetup', '-a')
     return nil if ret != 0
 
-    loops = out.collect do |l| 
+    loops = out.collect do |l|
       (dev,x) = l.split(':',2)
-      dev.sub(%r|^/dev/loop|,'').to_i 
+      dev.sub(%r|^/dev/loop|,'').to_i
     end
-  
+
     for i in 0..max
       if not loops.index(i)
         return "/dev/loop#{i}"
@@ -569,12 +568,12 @@ class LnBackup
     end
     return nil
   end
-  
+
   def mk_loop( dev, passwd, size=0, crypto='aes-256' )
     if dev !~ %r|/dev/|
       system_catch_stdin_stderr( '/bin/dd', 'if=/dev/zero', "of=#{dev}", 'bs=1M', "count=#{size}" )
     end
-  
+
     loop_dev = find_loop
     system_catch_stdin_stderr_with_input( passwd+"\n", '/sbin/losetup', '-p', '0', '-e', crypto, loop_dev, dev )
     system_catch_stdin_stderr( 'mkfs.ext3', loop_dev )
@@ -586,15 +585,15 @@ class LnBackup
     #@log.debug { "restore_dir_attributes: depth=#{depth}" }
     return dirs.find_all do |dir, stat, access_acl, default_acl, d|
       next true if d<depth
-      
-      @log.debug { "chown, utime, chmod #{dir}" } 
+
+      @log.debug { "chown, utime, chmod #{dir}" }
       if not @test_mode
-        begin 
+        begin
           File.chown(stat.uid, stat.gid, dir)
         rescue => error
           @log.warn { "restore_attributes: chown #{dir} got error and didn't restore owner': #{error.message}\n" }
         end
-        begin 
+        begin
           File.chmod(stat.mode, dir)
         rescue => error
           @log.warn { "restore_attributes: chmod #{dir} got error and didn't restore rights': #{error.message}\n" }
@@ -607,7 +606,7 @@ class LnBackup
             @log.warn { "restore_attributes: couldn't restore ACLs: #{error.message}\n" }
           end
         end
-        begin 
+        begin
           File.utime(stat.atime, stat.mtime, dir)
         rescue => error
           @log.warn { "restore_attributes: utime #{dir} got error and didn't restore times': #{error.message}\n" }
@@ -631,7 +630,7 @@ class LnBackup
       msg = "text file busy #{from} : #{e.message}"
       @log.error { msg }
       raise SysCopyFailure.new( msg )
-    end     
+    end
 
     st = nil
     begin
@@ -640,14 +639,14 @@ class LnBackup
       @log.warn { "copy_preserve: File.stat #{from} got error and failed: #{error.message}\n" }
       @log.warn { "copy_preserve: NOT restoring owner, rights, times and ACLs on #{to}\n" }
     end
-    
+
     if st
-      begin 
+      begin
         File.chown( st.uid,   st.gid,   to )
       rescue => error
         @log.warn { "copy_preserve: chown #{to} got error and didn't restore owner: #{error.message}\n" }
       end
-      begin 
+      begin
         File.chmod( st.mode,  to )
       rescue => error
         @log.warn { "copy_preserve: chmod #{to} got error and didn't restore rights: #{error.message}\n" }
@@ -660,7 +659,7 @@ class LnBackup
           @log.warn { "copy_preserve: setfacl #{to} got error and didn't restore ACLs: #{error.message}\n" }
         end
       end
-      begin 
+      begin
         File.utime( st.atime, st.mtime, to )
       rescue => error
         @log.warn { "copy_preserve: utime #{to} got error and didn't restore times: #{error.message}\n" }
@@ -714,7 +713,7 @@ class LnBackup
     # matchujeme
     @exclude_list.each do |a|
       begin
-        if (a[2] ? path : rel_path) =~ a[1] 
+        if (a[2] ? path : rel_path) =~ a[1]
           if a[0]
             @log.debug { "excluding(#{a[1].source}): #{path}" }
             Find.prune
@@ -739,7 +738,7 @@ class LnBackup
       return
     end
     exclude_pattern = true
-    if str =~ /^\+\s*(.*)$/   
+    if str =~ /^\+\s*(.*)$/
       exclude_pattern = false
       str = $1
     elsif str =~ /^-\s*(.*)$/
@@ -756,10 +755,10 @@ class LnBackup
     mount_backup or return print_error_stats( MOUNT_FAILED )
     return 0
   end
-  
+
   #### zalohovani se vsim vsudy ####
   def go_backup( name, no_mirror )
-    if ((res = config_init(name)) != 0) || ((res = umount_fsck_mount) != 0) 
+    if ((res = config_init(name)) != 0) || ((res = umount_fsck_mount) != 0)
       return res
     end
 
@@ -773,11 +772,11 @@ class LnBackup
     else
       print_error_stats( res )
     end
-    
+
     umount_backup(true)
     return res
   end
-  
+
   def detect_running(lock_file_name)
     if FileTest.exists?(lock_file_name)
       @log.debug { "detect_running: lock file #{lock_file_name} exists" }
@@ -808,14 +807,14 @@ class LnBackup
   end
 
   # Hledame v predchozich zalohach soubor jmena podle tmp_src.
-  # Divame, jestli nalezeny souboj je "stejny" jako ten, ktery 
+  # Divame, jestli nalezeny souboj je "stejny" jako ten, ktery
   # mame zalohovat.
   # Pokud ano, vratime ho, jinak vratime nil.
-  # Hledani zarazime, pokud najdeme soubor na stejne ceste, 
+  # Hledani zarazime, pokud najdeme soubor na stejne ceste,
   # ktery neni "stejny"
   #
-  # TODO: hledani by se melo take zastavit, kdyz se podivame do posledni 
-  # dokoncene zalohy -- na to potrebujeme strojive zpracovatelny status 
+  # TODO: hledani by se melo take zastavit, kdyz se podivame do posledni
+  # dokoncene zalohy -- na to potrebujeme strojive zpracovatelny status
   # file pro predchozi zalohy --> ukol k reseni
   def find_same_prev_backup( src, tmp_src, all_backups )
     max_iter = @max_iter
@@ -832,12 +831,12 @@ class LnBackup
 
   def get_access_acl(file)  ($HAVE_ACL and not @no_acl) ? (ACL::from_file(file) rescue nil) : nil; end
   def get_default_acl(file) ($HAVE_ACL and not @no_acl) ? (ACL::default(file)   rescue nil) : nil; end
- 
+
   #### hlavni zalohovaci rutina ####
   def run_backup
     begin
       @log.info { "running backup #{@backup_name}" }
-      
+
       @skip_excludes = false
       lock_file = nil
       pre_command_ok = true
@@ -882,7 +881,7 @@ class LnBackup
         return PIDFILE_FAILED
       end
 
-      # udaj o rezervovanem miste bereme prednosti z konkretni zalohy, 
+      # udaj o rezervovanem miste bereme prednosti z konkretni zalohy,
       # pokud neni nakonfigurovan, tak globalne
       files_reserved  = conf_val(:files_reserved)
       blocks_reserved = conf_val(:blocks_reserved)
@@ -898,8 +897,8 @@ class LnBackup
         @dont_delete << prev_backup.gsub(/\/[^\/]*$/,'')
       end
 
-      @dest = File.join( dest_tmp, 
-                         Date.today.backup_dir(@cur_config[:hourly]), 
+      @dest = File.join( dest_tmp,
+                         Date.today.backup_dir(@cur_config[:hourly]),
                          @target_dir_name ).squeeze('/')
       # a nemazeme ani to, co zrovna zalohujeme
       @dont_delete << @dest.gsub(/\/[^\/]*$/,'')
@@ -914,7 +913,7 @@ class LnBackup
           rescue Errno::ENOSPC
             make_some_space and retry
           end
-        rescue => e 
+        rescue => e
           @log.fatal { "can't make backup dir '#{@dest}'" }
           @log.fatal { "mkpath #{@dest} raised exception #{e.class}:'#{e.message}'" }
           @log.fatal { e.backtrace.join("\n") }
@@ -924,9 +923,9 @@ class LnBackup
 
       @log.debug { "previous backup: #{prev_backup}" }
       @log.debug { "dont_delete: #{@dont_delete.join(',')}" }
-      
+
       # adresare je nutno vyrobit, nez do nich nasypeme soubory,
-      # ale nastavit jejich atributy musime az po souborech, 
+      # ale nastavit jejich atributy musime az po souborech,
       dirs_to_restore = []
 
       dirs = Array.new
@@ -991,11 +990,11 @@ class LnBackup
           path = total
         end
 
-        # overime, ze existuje i cesta, kam nas zavedly odkazy a 
+        # overime, ze existuje i cesta, kam nas zavedly odkazy a
         # ulozime si device pro budouci porovnavani
         dev = nil
         begin
-          dev = File.stat(path).dev 
+          dev = File.stat(path).dev
         rescue Errno::ENOENT
           @log.error { "path #{path} not found --> skipping from backup" }
           next
@@ -1020,7 +1019,7 @@ class LnBackup
           end
           dirs_to_restore = restore_dir_attributes(dirs_to_restore, depth+1) if last_depth>depth
           last_depth = depth
-          
+
           @last_file = src
           src     = File.expand_path('./'+src, '/')
           tmp_src = './' + src
@@ -1032,8 +1031,8 @@ class LnBackup
             @log.error { "can not stat #{src}: #{error.class}: #{error.message} --> skipping from backup" }
             Find.prune
           end
-          
-          # POZOR !! 
+
+          # POZOR !!
           # nelze volat file_stat.readable?, protoze:
           # irb(main):016:0* File.lstat('/etc/asterisk/cdr_manager.conf').readable?
           # => false
@@ -1044,24 +1043,24 @@ class LnBackup
           # irb(main):020:0> system('ls -l /etc/asterisk/cdr_manager.conf')
           # -rw-rw----  1 asterisk asterisk 59 2005-12-08 00:58 /etc/asterisk/cdr_manager.conf
           # => true
-          
+
           # if not file_stat.readable? and not file_stat.symlink?
           if not File.readable?(src) and not file_stat.symlink?
             @log.error { "can not read #{src} --> skipping from backup" }
             Find.prune
           end
 
-          if file_stat.symlink? or file_stat.blockdev? or file_stat.chardev? or 
+          if file_stat.symlink? or file_stat.blockdev? or file_stat.chardev? or
              file_stat.socket? or file_stat.pipe?
             # symlink, blockdev, chardev, socket, pipe zalohujeme pomoci 'cp -a'
             do_cp_a(src, dest)
-            if file_stat.symlink? 
+            if file_stat.symlink?
               @stats[:symlink] += 1
-            elsif file_stat.blockdev? 
+            elsif file_stat.blockdev?
               @stats[:blockdev] += 1
-            elsif file_stat.chardev? 
+            elsif file_stat.chardev?
               @stats[:chardev] += 1
-            elsif file_stat.socket? 
+            elsif file_stat.socket?
               @stats[:socket] += 1
             elsif file_stat.pipe?
               @stats[:pipe] += 1
@@ -1095,7 +1094,7 @@ class LnBackup
                 # 2304  ---> md0
                 # 26625 ---> hwraid
                 # 9 --> autofs
-                # 7 --> pts 
+                # 7 --> pts
                 # 2 --> proc
                 # 0xa --> nfs
               when :single
@@ -1112,11 +1111,11 @@ class LnBackup
             backuped = false
             new      = false
             last     = nil
-            if prev_backup 
+            if prev_backup
               # hledat file i v predchozich zalohach: viz. TODO OTESTOVAT!!
               #last = File.expand_path(tmp_src, prev_backup)
               #if same_file?(src,last)
-              
+
               # hledame v drivejsich zalohach ...
               last = find_same_prev_backup(src, tmp_src, all_backups)
               if last # last neni ani 'nil', ano 'false'
@@ -1157,11 +1156,11 @@ class LnBackup
       restore_dir_attributes(dirs_to_restore)
 
       over_all_status = BACKUP_OK
-      
+
       @log.info { "Backup '#{@target_dir_name}' complete succesfully." }
       print_stats( over_all_status )
     rescue MakeSpaceFailure => e
-      return e.code # in this case we return the error code given by exception 
+      return e.code # in this case we return the error code given by exception
                     # ( possibly ignoring status code from post_command )
     ensure
       if lock_file
@@ -1220,7 +1219,7 @@ class LnBackup
 
   def print_error_stats(err)
     status = []
-    status << "error code: #{err}" 
+    status << "error code: #{err}"
     status << "message: #{MESSAGES[err]}"
     print_status_array(status)
     return err
@@ -1257,7 +1256,7 @@ class LnBackup
         status_array[0].update( status_hash )
 
       # writing new status information -- add new element to the beginning
-      else 
+      else
         status_array.unshift( status_hash )
       end
 
@@ -1329,7 +1328,7 @@ class LnBackup
     total_message = total_message_bad if worst_result != 0
     return [worst_result, total_message]
   end
-  
+
   def nagios_check( backup_name = 'localhost' )
     @status_file = @status_file_pref + '-' + backup_name
     conf_key = backup_name.intern
@@ -1405,14 +1404,14 @@ class LnBackup
 
   def do_mirror_only(name)
     if (res = config_init(name)) != 0
-      return res 
+      return res
     end
-    
+
     @status_file = '/dev/null'
     @dest        = find_backups[-1]
     create_mirror
   end
-  
+
   #### vytvoreni mirroru
   # pousti se po run_backup, takze muze pocitat s pripravenym prostredim...
   def create_mirror
@@ -1440,17 +1439,17 @@ class LnBackup
 
     # smazat stary mirror
     command = [ 'find', "#{mnt}", '-xdev',
-                    '-maxdepth', '1', '-mindepth', '1', 
+                    '-maxdepth', '1', '-mindepth', '1',
                     '!', '-name', 'backup',
                     '!', '-name', 'LNBACKUP_RUNNING',
-                    '!', '-name', 'lost+found', 
+                    '!', '-name', 'lost+found',
                     '-exec', 'rm', '-fr', '{}', ';' ]
     @log.debug { 'running: ' + command.join(' ')  }
     system( *command ) unless @test_mode
 
     @exclude_list = []
     @skip_excludes = true
-                    
+
     @dont_delete      = [@dest]
     latest_mirror     = @dest
     latest_mirror_len = latest_mirror.size
@@ -1459,7 +1458,7 @@ class LnBackup
     # vytvorit novy mirror
     dirs_to_restore   = []
     last_depth        = 0
-    Find.find3(latest_mirror + '/') do |src,depth| 
+    Find.find3(latest_mirror + '/') do |src,depth|
       if @delay_denom
         if @delay and (rand(@delay_denom) == 0)
             sleep(@delay)
@@ -1495,7 +1494,7 @@ class LnBackup
     restore_dir_attributes(dirs_to_restore)
 
     # vypnout lnbackup na zazalohovane kopii
-    # mv "$MNT"/etc/cron.daily/lnbackup{,.disabled}                                                                                                                               
+    # mv "$MNT"/etc/cron.daily/lnbackup{,.disabled}
     # ucinit system bootovatelnym, pokud mame zadan i disk
     ret = true
     if disk
@@ -1551,7 +1550,7 @@ class LnBackup
     swap_n    = ( ( swap_line =~ /^#{disk}(\d+).*$/ ) ? $1 : nil ).to_s
     part_n    = ( ( part =~ /^#{disk}(\d+)$/ ) ? $1 : nil ).to_s
     fstab     = "#{mnt}/etc/fstab"
-  
+
     # check fstab
     if part_n == ''
       @log.error { "Cannot find correct part_n='#{part_n}'!" }
@@ -1567,7 +1566,7 @@ class LnBackup
 
     ext3_options = 'noatime,defaults,errors=remount-ro'
     ext3_options << ',acl,user_xattr' if $HAVE_ACL and not @no_acl
-    
+
     # create fstab
     File.unlink(fstab)
     File.open(fstab,'w') do |f|             # TODO: generate fstab based of filesystem LABELs (if possible, swap?)
@@ -1577,16 +1576,16 @@ class LnBackup
       f.puts "/dev/hda#{swap_n} none         swap     sw                 0       0" if swap_n != ''
       f.puts "proc              /proc        proc     defaults           0       0"
     end
-  
+
     return true
   end
-  
+
   def create_lilo_conf( mnt, part, disk )
     # run lilo
     sys_lilo_cfg = "/etc/lilo.conf"             # TODO relativni k necemu?
     lilo_cfg     = File.join( mnt, sys_lilo_cfg )
-  
-  
+
+
     File.unlink( lilo_cfg  )
     File.open( lilo_cfg, 'w' ) do |f|
       f.puts "disk=#{disk}\nbios=0x80"
@@ -1604,7 +1603,7 @@ class LnBackup
       return true
     end
   end
-  
+
   #### kontrola disku a spousteni fsck ####
   def check_fsck
     part        = nil
@@ -1616,7 +1615,7 @@ class LnBackup
       part = conf_val(:device)
       if (crypto)
         loop_dev = find_loop
-        system_catch_stdin_stderr_with_input( password+"\n", '/sbin/losetup', 
+        system_catch_stdin_stderr_with_input( password+"\n", '/sbin/losetup',
                                               '-p', '0', '-e', crypto, loop_dev, part )
         part = loop_dev
       end
@@ -1624,7 +1623,7 @@ class LnBackup
       if ! part.to_s.empty?
         @log.debug { "running: /sbin/tune2fs -l #{part}" }
         fs_params = {}
-        
+
         ret, out, err = system_catch_stdin_stderr('/sbin/tune2fs', '-l', part)
         if ret == 0
           out.split("\n").each do |l|
@@ -1638,7 +1637,7 @@ class LnBackup
           return false
         end
 
-        if (mount_count = fs_params['Mount count'].to_i)+5 >= 
+        if (mount_count = fs_params['Mount count'].to_i)+5 >=
               (max_mount_count = fs_params['Maximum mount count'].to_i)
           @log.info { "Disk #{part} has reached mount_count: #{mount_count} (max: #{max_mount_count}), running fsck" }
           if not @test_mode
@@ -1673,7 +1672,7 @@ class LnBackup
 
     return true
   end
-  
+
   #### vypsani stavu zalohy ####
   def backup_status( backup_name, status_file_pref = nil )
     @status_file_pref = status_file_pref if status_file_pref
@@ -1701,7 +1700,7 @@ class LnBackup
     end
     return [ :none, nil ]
   end
-  
+
   def mount_backup(rw = true)
     device      = conf_val(:device)
     mount_point = conf_val(:mount_point)
@@ -1715,7 +1714,7 @@ class LnBackup
       mount_status, mount_dev = check_mounted
       @log.debug { "mount status before mount: device: #{mount_dev}, status: #{mount_status}" }
 
-      # pokud je na nasem mountpointu namountovano cokoliv jineho, nez co ma byt, koncime 
+      # pokud je na nasem mountpointu namountovano cokoliv jineho, nez co ma byt, koncime
       if (mount_status != :none) and (mount_dev != device)
         @log.fatal { "wrong device mounted as #{mount_point}: have #{mount_dev}, need #{device}"}
         return false
@@ -1725,16 +1724,16 @@ class LnBackup
         if (mount_status == :ro) and rw
           # mame namontovano, ale jen ro, musime remountovat
           remount = true
-        else 
+        else
           # mame namontovano rw, ale neudelali jsme si to sami, preskocime mounting
           @log.warn { "disk not remounted, using previously mounted disk!" }
           return true
         end
       end
-      
+
       # try mount
-      @log.debug { "mounting #{device} --> #{mount_point} " + 
-                      (rw ? (remount ? 'remount,RW' : 'RW') : 'RO') + 
+      @log.debug { "mounting #{device} --> #{mount_point} " +
+                      (rw ? (remount ? 'remount,RW' : 'RW') : 'RO') +
                       (crypto ? '[crypto]':'') }
 
       cmd = [ 'mount', device, mount_point ]
@@ -1750,8 +1749,8 @@ class LnBackup
 
       cmd << '-t' << fstype unless fstype.to_s.empty?
 
-      ret, out, err = 
-          crypto ? system_catch_stdin_stderr_with_input( 
+      ret, out, err =
+          crypto ? system_catch_stdin_stderr_with_input(
                       *( [password+"\n"] + cmd + ["-oencryption=#{crypto}", '-p', '0'] ) ) :
                    system_catch_stdin_stderr( *cmd )
       if ret != 0
@@ -1803,10 +1802,10 @@ class LnBackup
 
   def mirror_only( backup_name )
     return MOUNT_FAILED unless mount_backup
-  
+
     mirror_res = do_mirror_only( backup_name )
     res        = mirror_res unless mirror_res == nil
-  
+
     umount_backup
     return 0
   end
@@ -1819,7 +1818,7 @@ class LnBackup
     end
 
     pc_status = Marshal.restore( File.open( pcs_status_f ).read( nil ) ) rescue {}
-    
+
     @pcb[:backup_hosts].each do |host|
       @log.info { "mounting #{host}" }
       mount_to = "#{@pcb[:mounts_root]}/#{host}"
@@ -1829,11 +1828,11 @@ class LnBackup
       pc_status[host] = Hash.new unless pc_status.key?(host)
       pc_status[host][:tried] = Time.now
       pc_status[host][:status] = -1
-      
-      cmd = [ "/bin/mount", "-t", "smbfs", "-o", 
+
+      cmd = [ "/bin/mount", "-t", "smbfs", "-o",
               "username=#{@pcb[:backup_user]},"+
               "password=#{@pcb[:backup_password]},"+
-              "workgroup=#{@pcb[:backup_workgroup]}", 
+              "workgroup=#{@pcb[:backup_workgroup]}",
               "//#{host}/#{@pcb[:backup_share]}", mount_to ]
       @log.debug { "running '" + cmd.join("' '") + "'" }
       ret, out, err = system_catch_stdin_stderr( *cmd )
@@ -1841,9 +1840,9 @@ class LnBackup
       if ret == 0
         begin
           @log.debug { "host #{host} mount passed" }
-          
+
           # run backup
-          bk2 = LnBackup.new( 
+          bk2 = LnBackup.new(
             :log_level         => @log.level,
             :log_file          => "#{@pcb[:log_dir]}/lnbackup-#{host}.log",
             :test_mode         => @test_mode,
@@ -1916,7 +1915,7 @@ class LnBackup
         end
       end
     end
-    
+
     puts "</table></html>"
   end
 
@@ -1927,7 +1926,7 @@ class LnBackup
       @log.debug { "trying #{host} ... " }
       #echo smbclient -c "''" -W $BACKUP_WORKGROUP //$HOST/$BACKUP_SHARE -U $BACKUP_USER%$BACKUP_PASSWORD
       cmd = [ '/usr/bin/smbclient', '-c', '', '-W', @pcb[:backup_workgroup],
-          "//#{host}/#{@pcb[:backup_share]}", '-U', 
+          "//#{host}/#{@pcb[:backup_share]}", '-U',
           "#{@pcb[:backup_user]}%#{@pcb[:backup_password]}" ]
       @log.debug { "running '" + cmd.join("' '") + "'" }
 
