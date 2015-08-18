@@ -46,7 +46,7 @@ zaloha() {
       if [ $DUMP == "/usr/bin/mysqldump" ]; then
       	$DUMP $database | grep -v 'Dump completed on ' | gzip --no-name > $TMP_DIR/$database.sql.gz # DUMP DB, vyjme se 'Dump completed on '(datum)pro pripad ze by byly soucasna i predchozi stejna a lisily se jen v datu  
       elif [ $DUMP == "/usr/bin/pg_dump" ]; then
-      	su postgres -c "$DUMP $database | gzip --no-name > $TMP_DIR/$database.sql.gz" # su postgres je tam proto aby se dump provadel pod uzivatelem postgres
+      	su - postgres -c "$DUMP $database | gzip --no-name > $TMP_DIR/$database.sql.gz" # su postgres je tam proto aby se dump provadel pod uzivatelem postgres
       fi
   
       #zjistit zda existuje vubec predchozi zaloha - v pripade ze ano tak porovnavat, v pripade ze ne tak to tam rovnou nahrnout
@@ -111,7 +111,7 @@ elif [ "${1}" == "--postgresql" ]; then
                 #pridani prav aby uzivatel postgres mohl zapisovat do cilove slozky
                 chmod o+w $DST_DIR
                
-               databases=`su postgres -c "psql -l | egrep -v '(Name.*Owner.*Encoding|List of databases|----------|. rows|^$)' | cut -f 2 -d ' '"` #do databases se zapisi DB ktere jsou na serveru
+               databases=`su - postgres -c "psql -l | egrep -v '(Name.*Owner.*Encoding|List of databases|----------|. rows|^$)' | cut -f 2 -d ' '"` #do databases se zapisi DB ktere jsou na serveru
                zaloha
        else
                echo "na serveru neni nainstalovan postgresql";
