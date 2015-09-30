@@ -9,5 +9,5 @@ install:
 	cp conf.d/09pcb 	  $(DESTDIR)/etc/lnbackup.d/
 	mkdir -p $(DESTDIR)/usr/bin
 	cp bin/* 	  		  $(DESTDIR)/usr/bin/
-	mkdir -p $(DESTDIR)/usr/lib/ruby/1.8/
-	cp -r lib/*  		  $(DESTDIR)/usr/lib/ruby/1.8/
+	mkdir -p $(DESTDIR)/usr/lib/ruby/vendor_ruby/
+	cp -r lib/*  		  $(DESTDIR)/usr/lib/ruby/vendor_ruby/

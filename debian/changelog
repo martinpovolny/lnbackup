@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.6) jessie; urgency=medium
+
+  * fix - compatibilita pro jessie
+
+ -- Marek Veber <Marek.Veber@solnet.cz>  Wed, 30 Sep 2015 16:16:26 +0200
+
 lnbackup-ng (2.0.5) wheezy; urgency=low
 
   * oprava cesty v cron skriptu

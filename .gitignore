@@ -3,3 +3,4 @@ debian/lnbackup.1
 debian/files
 debian/lnbackup-ng/
 debian/solnet-pool_version
+debian/debhelper.log
