@@ -1,8 +1,14 @@
-lnbackup-ng (2.0.6) jessie; urgency=medium
+lnbackup-ng (2.0.7) stable; urgency=medium
 
   * fix - compatibilita pro jessie
 
  -- Marek Veber <Marek.Veber@solnet.cz>  Wed, 30 Sep 2015 16:16:26 +0200
+
+lnbackup-ng (2.0.6) wheezy; urgency=medium
+
+  * oprava su v /usr/sbin/sql_backup.sh
+
+ -- juras <juras@solnet.cz>  Tue, 18 Aug 2015 14:19:56 +0200
 
 lnbackup-ng (2.0.5) wheezy; urgency=low
 
