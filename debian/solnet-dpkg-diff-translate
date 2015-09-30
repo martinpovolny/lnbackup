@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+dir, name = *ARGV
+if dir == '--inst2src'
+   if name =~ %r{^/usr/bin/(.*)}
+       name = "bin/" + $1
+   elsif name =~ %r{^/usr/sbin/(.*)}
+       name = "bin/" + $1
+#   elsif name =~ %r{^/usr/share/solnet/inchange/reports/libs/(.*)}
+#       name = "birt/libs/" + $1
+#   elsif name =~ %r{^/usr/share/solnet/inchange/reports/(.*)}
+#       name = "birt/reports/" + $1
+   end
+elsif dir == '--src2inst'
+   if name =~ %r{^bin/(.*)}
+       name = "/usr/bin/" + $1
+#   elsif name =~ %r{^birt/libs/(.*)}
+#       name = "/usr/share/solnet/inchange/reports/libs/" + $1
+#   elsif name =~ %r{^birt/reports/(.*)}
+#       name = "/usr/share/solnet/inchange/reports/" + $1
+   end
+end
+puts name
