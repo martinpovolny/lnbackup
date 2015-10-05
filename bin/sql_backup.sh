@@ -44,7 +44,7 @@ zaloha() {
   for database in $ZALOHOVAT_DB; do
       if [ $DUMP == "/usr/bin/mysqldump" ]; then
       	# DUMP DB, vyjme se 'Dump completed on '(datum)pro pripad ze by byly soucasna i predchozi stejna a lisily se jen v datu  
-        $TMP_FILE=`tempfile`
+        TMP_FILE=`tempfile`
       	$DUMP $database -r $TMP_FILE
       	grep -v 'Dump completed on ' $TMP_FILE > $TMP_DIR/$database.sql
         rm -f $TMP_FILE

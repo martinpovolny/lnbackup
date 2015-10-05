@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.9) stable; urgency=low
+
+  * fix v /usr/sbin/sql_backup.sh 
+
+ -- Martin Prochazka <Martin.Prochazka@solnet.cz>  Mon, 05 Oct 2015 16:43:29 +0200
+
 lnbackup-ng (2.0.8) stable; urgency=low
 
   * upravy /usr/sbin/sql_backup.sh, zmena dumpu myslq databazi
