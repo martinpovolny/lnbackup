@@ -1637,8 +1637,9 @@ class LnBackup
           return false
         end
 
-        if (mount_count = fs_params['Mount count'].to_i)+5 >=
-              (max_mount_count = fs_params['Maximum mount count'].to_i)
+        mount_count = fs_params['Mount count'].to_i
+        max_mount_count = fs_params['Maximum mount count'].to_i
+        if mount_count+5 >= max_mount_count and max_mount_count != -1
           @log.info { "Disk #{part} has reached mount_count: #{mount_count} (max: #{max_mount_count}), running fsck" }
           if not @test_mode
             ret, out, err = system_catch_stdin_stderr( '/sbin/fsck.ext3', '-y', part )

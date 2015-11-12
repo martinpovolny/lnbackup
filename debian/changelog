@@ -1,12 +1,19 @@
+lnbackup-ng (2.0.10) stable; urgency=low
+
+  * fix in /usr/lib/ruby/1.8/lnbackup/backup.rb -- support unset (-1) FS
+    maximum mount count
+
+ -- Martin Prochazka <Martin.Prochazka@solnet.cz>  Thu, 12 Nov 2015 16:01:25 +0100
+
 lnbackup-ng (2.0.9) stable; urgency=low
 
-  * fix v /usr/sbin/sql_backup.sh 
+  * fix in /usr/sbin/sql_backup.sh 
 
  -- Martin Prochazka <Martin.Prochazka@solnet.cz>  Mon, 05 Oct 2015 16:43:29 +0200
 
 lnbackup-ng (2.0.8) stable; urgency=low
 
-  * upravy /usr/sbin/sql_backup.sh, zmena dumpu myslq databazi
+  * changes in /usr/sbin/sql_backup.sh, (mysql dump)
 
  -- Martin Prochazka <Martin.Prochazka@solnet.cz>  Thu, 01 Oct 2015 10:40:59 +0200
 
