@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.11) stable; urgency=medium
+
+  * oprava navratove hodnoty pro pocitani spatnych "files new"
+
+ -- juras <juras@solnet.cz>  Thu, 19 May 2016 15:46:22 +0200
+
 lnbackup-ng (2.0.10) stable; urgency=low
 
   * fix in /usr/lib/ruby/1.8/lnbackup/backup.rb -- support unset (-1) FS

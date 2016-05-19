@@ -824,7 +824,7 @@ class LnBackup
       return false if FileTest.exists?(last)
 
       max_iter -= 1
-      return false if max_iter == 0
+      return nil if max_iter == 0
     end
     return nil
   end
