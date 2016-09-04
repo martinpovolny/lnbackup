@@ -12,7 +12,7 @@
       { :dir => '/home', :fs_type => :local, :exclude => ['samba/local/domain-users'] },
       { :dir => '/opt',  :fs_type => :local },
     ],
-    :mirror => true,
+    :mirror => false,
     :skip_lilo => true,
   },
 }

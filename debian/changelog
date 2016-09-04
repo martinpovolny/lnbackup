@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.12) stable; urgency=medium
+
+  * implicitne zakazny mirror
+
+ -- juras <juras@solnet.cz>  Sun, 04 Sep 2016 11:16:30 +0200
+
 lnbackup-ng (2.0.11) stable; urgency=medium
 
   * oprava navratove hodnoty pro pocitani spatnych "files new"
