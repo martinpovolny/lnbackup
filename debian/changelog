@@ -1,3 +1,10 @@
+lnbackup-ng (2.0.13) stable; urgency=medium
+
+  * v pripade, ze je device zadany jako symlink (/dev/mapper), dava se do pole zaloznich
+    partition i target symlinku
+
+ -- juras <juras@solnet.cz>  Thu, 02 Mar 2017 16:24:19 +0100
+
 lnbackup-ng (2.0.12) stable; urgency=medium
 
   * implicitne zakazny mirror

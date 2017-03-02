@@ -1306,6 +1306,12 @@ class LnBackup
             devs[backup] = [ find_dev_by(devs[backup], @config[backup][:device_uuid], :uuid) ]
         end
         out_backup_devices |= devs[backup]
+        devs[backup].each { |dev|
+            if File.symlink?(dev)
+                target=File.realpath(dev)
+                out_backup_devices |= [target]
+            end
+        }
     end
     return out_backup_devices
   end
