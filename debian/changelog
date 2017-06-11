@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.14) stable; urgency=medium
+
+  * oprava regrese predchozi upravy - preskakovani nil
+
+ -- juras <juras@solnet.cz>  Sun, 11 Jun 2017 20:20:24 +0200
+
 lnbackup-ng (2.0.13) stable; urgency=medium
 
   * v pripade, ze je device zadany jako symlink (/dev/mapper), dava se do pole zaloznich

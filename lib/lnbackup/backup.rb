@@ -1307,6 +1307,7 @@ class LnBackup
         end
         out_backup_devices |= devs[backup]
         devs[backup].each { |dev|
+            next if dev.nil?
             if File.symlink?(dev)
                 target=File.realpath(dev)
                 out_backup_devices |= [target]
