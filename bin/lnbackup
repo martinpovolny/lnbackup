@@ -65,7 +65,7 @@ def go
     p.on(      '--mountrw',                       'mount backup device rw')             { mountrw = true }
     p.on(      '--umount',                        'umount backup device')               { umount = true }
     p.on(      '--nagios',                        'run as nagios plugin')               { nagios = true }
-    p.on(      '--dump-log=FILE',         String, 'parse bin. log and dump to STDOUT')  { bin_log = true }
+    p.on(      '--dump-log=FILE',         String, 'parse bin. log and dump to STDOUT')  { |bl| bin_log = bl }
     p.on(      '--nagios-all',                    'run as nagios plugin for all backups config directory') { nagios_all = true }
     p.on(      '--source-prefix=DIR',     String, 'prefix the source directory given by configuration')    { |sp| source_prefix = sp }
     p.on(      '--target-dir-name=NAME',  String, 'set backup target directory under backup root ([backup-name] if not given)') { |td| target_dir_name = td }

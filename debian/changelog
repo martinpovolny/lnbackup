@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.15) stable; urgency=medium
+
+  * oprava --bin-log - spatne nastavovane jmeno souboru
+
+ -- juras <juras@solnet.cz>  Mon, 12 Jun 2017 17:14:10 +0200
+
 lnbackup-ng (2.0.14) stable; urgency=medium
 
   * oprava regrese predchozi upravy - preskakovani nil
