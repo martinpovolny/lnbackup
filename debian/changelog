@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.16) stable; urgency=medium
+
+  * opravena podpora pro acl - ve vetvi 2.X chybel include 'acl' knihovny
+
+ -- juras <juras@solnet.cz>  Wed, 21 Jun 2017 14:32:22 +0200
+
 lnbackup-ng (2.0.15) stable; urgency=medium
 
   * oprava --bin-log - spatne nastavovane jmeno souboru

@@ -3,6 +3,13 @@
 require 'lnbackup'
 require 'optparse'
 
+begin
+  require 'acl'
+  $HAVE_ACL = true
+rescue LoadError
+  $HAVE_ACL = false
+end
+
 def go
   debug_levels = {
     :debug => Logger::DEBUG,
