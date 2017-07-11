@@ -86,8 +86,8 @@ def go
     p.on('--init-crypto[=SIZE]',                   'initialize crypto loop device, optional SIZE in MB (ignored if block device)') { |crypto_size| init_crypto = true }
     p.on('--delay=FLOAT',                 Float,   'delay (sec) between processing objects') { |delay| delay = delay.to_f }
     p.on('--delay-denom=N',               Integer, 'apply delay every N objects') { |delay_denom| delay_denom = delay_denom.to_i }
-    p.on('--no-delete',                            'don\'t remove old backups, return error when out of space') { |no_delete| no_delete = true }
-    p.on('--no-acl',                               'don\'t restore ACL, don\'t generate fstab with ACL options') { |no_acl| no_acl = true }
+    p.on('--no-delete',                            'don\'t remove old backups, return error when out of space') { no_delete = true }
+    p.on('--no-acl',                               'don\'t restore ACL, don\'t generate fstab with ACL options') { no_acl = true }
     p.on('--version',                              'version info') { puts LnBackup::VERSION; exit(1) }
     p.on('--help',                                 'display help') { puts p; exit(1) }
     p.on('--search-iter=NUMBER',                   'number of backups to search for files not contained in the last backup (0 for unlimited, default 5)') { |mi| max_iter = mi.to_i }
