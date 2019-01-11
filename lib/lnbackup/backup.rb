@@ -504,9 +504,10 @@ class LnBackup
 
   def disk_for_device( device )
     dirname=File.dirname(device)
-    devname=`/bin/lsblk -no pkname #{device}`
+    devname_tmp=`/bin/lsblk -no pkname #{device}`
     return nil if not $?.exitstatus == 0
-    devname.chomp!
+    # pro disky v raidu muze mit lsblk vystup vice radku, zajima nas ten prvni
+    devname=devname_tmp.lines.first.chomp
     return [dirname,devname].join('/')
 #    disk = `/usr/bin/dirname #{device}`.chomp! + '/' + `/bin/lsblk -no pkname #{device}`.chomp!
 #    return disk

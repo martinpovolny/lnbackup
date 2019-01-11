@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.20) stable; urgency=medium
+
+  * pridana zavislost na util-linux 
+
+ -- Petr Jurasek <Petr.Jurasek@solnet.cz>  Fri, 11 Jan 2019 15:23:08 +0100
+
 lnbackup-ng (2.0.19) stable; urgency=medium
 
   * jeste jeden preklep v disk_for_device

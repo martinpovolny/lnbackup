@@ -8,7 +8,7 @@ Standards-Version: 3.5.2
 Package: lnbackup-ng
 Architecture: all
 Multi-Arch: foreign
-Depends: libfilesystem-ruby1.8 | ruby-filesystem, ruby, libacl-ruby1.8 | ruby-acl
+Depends: libfilesystem-ruby1.8 | ruby-filesystem, ruby, libacl-ruby1.8 | ruby-acl, util-linux
 Recommends: loop-aes-utils
 Conflicts: lnbackup
 Description: hardlink backup system
