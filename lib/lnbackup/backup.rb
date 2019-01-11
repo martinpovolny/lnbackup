@@ -503,13 +503,13 @@ class LnBackup
   end
 
   def disk_for_device( device )
-    # TODO: udelat poradne
-    if device =~ %r{^(/dev/[hs]d[a-z])[0-9]$}
-      return $1
-    elsif device =~ %r{^(/dev/.*?)p[0-9]$}
-      return $1
-    end
-    return nil
+    dirname=File.dirname(device)
+    devname=/bin/lsblk -no pkname #{device}`
+    return nil if not $?.exitstatus == 0
+    devname.chomp!
+    return [dirname,devname].join('/')
+#    disk = `/usr/bin/dirname #{device}`.chomp! + '/' + `/bin/lsblk -no pkname #{device}`.chomp!
+#    return disk
   end
 
   # nastavovani labelu: tune2fs -L MUFF2 /dev/sdb1
@@ -724,7 +724,7 @@ class LnBackup
       rescue => e
         @log.warn { "problem with encoding --> not pruning" }
         @log.warn { "pattern: #{a.inspect}, path: #{path.inspect}, rel_path: #{rel_path.inspect}, exception #{e.class}:'#{e.message}'" }
-        @log.warn { e.backtrace.join("\n") }
+        #@log.warn { e.backtrace.join("\n") }
         return
       end
     end
