@@ -504,7 +504,7 @@ class LnBackup
 
   def disk_for_device( device )
     dirname=File.dirname(device)
-    devname=/bin/lsblk -no pkname #{device}`
+    devname=`/bin/lsblk -no pkname #{device}`
     return nil if not $?.exitstatus == 0
     devname.chomp!
     return [dirname,devname].join('/')

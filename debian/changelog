@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.19) stable; urgency=medium
+
+  * jeste jeden preklep v disk_for_device
+
+ -- Petr Jurasek <Petr.Jurasek@solnet.cz>  Fri, 11 Jan 2019 14:04:41 +0100
+
 lnbackup-ng (2.0.18) stable; urgency=medium
 
   * RT_30535 - zruseni matouci hlasky v logu
