@@ -1,5 +1,7 @@
 # encoding: UTF-8
 # ruby1.8 compat
+if (RUBY_VERSION =~ /^1\.(\d+)/) && ($1.to_i < 8)
+# pre ruby1.8
 unless Thread.respond_to?(:exclusive)
   class Thread
     def self.exclusive
@@ -8,6 +10,18 @@ unless Thread.respond_to?(:exclusive)
       Thread.critical = false
     end
   end
+  class MyMutex
+      def synchronize
+          Thread.exclusive {
+              yield
+          }
+      end
+  end
+  $mutex = MyMutex.new
+end
+else
+  require 'thread'
+  $mutex = Mutex.new
 end
 
 module LnBackup
@@ -383,7 +397,7 @@ class LnBackup
 
     pid = nil
     begin
-      Thread.exclusive do
+      $mutex.synchronize do
         STDOUT.flush
         STDERR.flush
 
@@ -428,7 +442,7 @@ class LnBackup
 
     pid = nil
     begin
-      Thread.exclusive do
+      $mutex.synchronize do
         STDOUT.flush
         STDERR.flush
 

@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.21) stable; urgency=medium
+
+  * použití Mutex - oprava "Thread.exclusive is deprecated, use Thread::Mutex"
+
+ -- Marek Veber <Marek.Veber@solnet.cz>  Thu, 17 Jan 2019 00:55:21 +0100
+
 lnbackup-ng (2.0.20) stable; urgency=medium
 
   * pridana zavislost na util-linux 
