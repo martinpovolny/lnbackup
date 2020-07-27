@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.23) stable; urgency=medium
+
+  * v sql_backup.sh pridano vypinani lock, rt 39155
+
+ -- Petr Jurasek <Petr.Jurasek@solnet.cz>  Mon, 27 Jul 2020 14:02:23 +0200
+
 lnbackup-ng (2.0.22) stable; urgency=medium
 
   * nahrazeni zavislosti ruby-filesystem za ruby-sys-filesystem, RT_31154
