@@ -43,11 +43,8 @@ zaloha() {
   
   for database in $ZALOHOVAT_DB; do
       if [ $DUMP == "/usr/bin/mysqldump" ]; then
-      	# DUMP DB, vyjme se 'Dump completed on '(datum)pro pripad ze by byly soucasna i predchozi stejna a lisily se jen v datu  
-        TMP_FILE=`tempfile`
-      	$DUMP --lock-tables=false $database -r $TMP_FILE
-      	grep -v 'Dump completed on ' $TMP_FILE > $TMP_DIR/$database.sql
-        rm -f $TMP_FILE
+      	# musime vynechat komentar s datem vytvoreni dumpu, jinak by byl vzdy odlisny od predchoziho
+      	$DUMP --skip-lock-tables --skip-dump-date $database -r $TMP_DIR/$database.sql
       	gzip --no-name $TMP_DIR/$database.sql
       elif [ $DUMP == "/usr/bin/pg_dump" ]; then
       	# su postgres je tam proto aby se dump provadel pod uzivatelem postgres

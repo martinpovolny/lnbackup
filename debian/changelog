@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.24) stable; urgency=medium
+
+  * vynechan grep v sql_backup.sh - na buster muze dochazet k zahozeni binarnich dat 
+
+ -- Petr Jurasek <Petr.Jurasek@solnet.cz>  Tue, 27 Oct 2020 13:08:25 +0100
+
 lnbackup-ng (2.0.23) stable; urgency=medium
 
   * v sql_backup.sh pridano vypinani lock, rt 39155
