@@ -1,3 +1,9 @@
+lnbackup-ng (2.0.25) stable; urgency=medium
+
+  * osetreni mozneho nil
+
+ -- Petr Jurasek <petr.jurasek@solnet.cz>  Tue, 20 Jun 2023 14:06:21 +0200
+
 lnbackup-ng (2.0.24) stable; urgency=medium
 
   * vynechan grep v sql_backup.sh - na buster muze dochazet k zahozeni binarnich dat 

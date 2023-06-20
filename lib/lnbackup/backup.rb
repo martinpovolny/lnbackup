@@ -517,7 +517,7 @@ class LnBackup
   end
 
   def disk_for_device( device )
-    dirname=File.dirname(device)
+    dirname=File.dirname(device) if not device.nil?
     devname_tmp=`/bin/lsblk -no pkname #{device}`
     return nil if not $?.exitstatus == 0
     # pro disky v raidu muze mit lsblk vystup vice radku, zajima nas ten prvni
